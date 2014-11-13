@@ -41,15 +41,30 @@ class FeedTestCase(unittest.TestCase):
 		self.assertTrue(self._element('webMaster', 'john@doe.com') in Feed('', '', '', webMaster = 'john@doe.com').rss())
 		self.assertTrue(self._element('pubDate', 'Thu, 13 Nov 2014 08:00:00 GMT') in Feed('', '', '', pubDate = datetime.datetime(2014, 11, 13, 8, 0, 0)).rss())
 		self.assertTrue(self._element('lastBuildDate', 'Mon, 01 Dec 2014 10:22:15 GMT') in Feed('', '', '', lastBuildDate = datetime.datetime(2014, 12, 1, 10, 22, 15)).rss())
-		self.assertTrue(self._element('generator', 'Name goes here') in Feed('', '', '', generator = 'Name goes here').rss())
+		self.assertTrue(self._element('generator', 'Generator goes here') in Feed('', '', '', generator = 'Generator goes here').rss())
+		self.assertTrue(self._element('docs', 'Docs goes here') in Feed('', '', '', docs = 'Docs goes here').rss())
+
+	def test_cloud_element(self):
+		rss = Feed('', '', '', cloud = Cloud('1', 2, '3', '4', '5')).rss()
+		self.assertTrue('<cloud ' in rss)
+		self.assertTrue('domain="1"' in rss)
+		self.assertTrue('port="2"' in rss)
+		self.assertTrue('path="3"' in rss)
+		self.assertTrue('registerProcedure="4"' in rss)
+		self.assertTrue('protocol="5"' in rss)
+		self.assertTrue('</cloud>' in rss)
 
 	def test_if_generator_not_specified_use_default_value(self):
 		# I'm partially checking for the element because the value includes the version number and
 		# changing it will break the test. By just doing a partial match, I make sure the test keeps
 		# working in future versions as well.
+		self.assertTrue(self._element('docs', 'https://github.com/svpino/rfeed/blob/master/README.md') in Feed('', '', '').rss())
+
+	def test_if_docs_not_specified_use_default_value(self):
 		self.assertTrue('<generator>rfeed v' in Feed('', '', '').rss())		
 
-	def _element(self, element, value):
+	def _element(self, element, value, attributes = {}):
+
 		return '<' + element + '>' + value + '</' + element + '>'
 
 if __name__ == '__main__':

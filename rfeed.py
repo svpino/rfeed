@@ -2,6 +2,7 @@ __name__ = "rfeed"
 __version__ = (1, 0, 0)
 __author__ = "Santiago L. Valdarrama - https://blog.svpino.com"
 _generator = __name__ + " v" + ".".join(map(str, __version__))
+_docs = "https://github.com/svpino/rfeed/blob/master/README.md"
 
 import sys
 import datetime
@@ -13,14 +14,16 @@ class Serializable:
 		self.handler = None
 
 	def _write_element(self, name, value, attributes = {}):
-		if value is not None:
+		if value is not None or attributes != {}:
 			self.handler.startElement(name, attributes)
-			self.handler.characters(value)
+
+			if value is not None:
+				self.handler.characters(value)
+
 			self.handler.endElement(name)
 
-	def _publish(self):
-		# This is the method that subclasses should override
-		pass
+	def _publish(self, handler):
+		self.handler = handler
 
 	def date(self, date):
 		""" Converts a datetime into an RFC 822 formatted date.
@@ -41,6 +44,21 @@ class Serializable:
 		
 		return "%s, %02d %s %04d %02d:%02d:%02d GMT" % (["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][date.weekday()], date.day,
             ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][date.month-1], date.year, date.hour, date.minute, date.second)
+
+class Cloud(Serializable):
+	def __init__(self, domain, port, path, registerProcedure, protocol):
+		Serializable.__init__(self)
+
+		self.domain = domain
+		self.port = port
+		self.path = path
+		self.registerProcedure = registerProcedure
+		self.protocol = protocol
+
+	def _publish(self, handler):
+		Serializable._publish(self, handler)		
+
+		self._write_element("cloud", None, { "domain": self.domain, "port": str(self.port), "path": self.path, "registerProcedure": self.registerProcedure, "protocol": self.protocol })
 
 class iTunes(Serializable):
 	def __init__(self, author, block, category, image, explicit, complete, new_feed_url, owner, subtitle, summary):
@@ -63,7 +81,9 @@ class Item(Serializable):
 
 		self.title = title
 
-	def _publish(self):
+	def _publish(self, handler):
+		Serializable._publish(self, handler)
+
 		self.handler.startElement("item", {})
 
 		self._write_element("title", self.title)
@@ -82,6 +102,8 @@ class Feed(Serializable):
 		pubDate = None,				# The publication date for the content in the channel. This should be a datetime in GMT format.
 		lastBuildDate = None,		# The last time the content of the channel changed. This should be a datetime in GMT format.
 		generator = None,			# A string indicating the program used to generate the channel.
+		docs = None,				# A URL that points to the documentation for the format used in the RSS file.
+		cloud = None,				# Allows processes to register with a cloud to be notified of updates to the channel. This is a Cloud object.
 
 		items = None):
 
@@ -100,20 +122,23 @@ class Feed(Serializable):
 		self.webMaster = webMaster
 		self.pubDate = pubDate
 		self.lastBuildDate = lastBuildDate
-
 		self.generator = _generator if generator is None else generator
+		self.docs = _docs if docs is None else docs
+		self.cloud = cloud
 
 		self.items = [] if items is None else items
 
 	def rss(self):
 		output = StringIO()
-		self.handler = saxutils.XMLGenerator(output, 'iso-8859-1')
-		self.handler.startDocument()
-		self._publish()
-		self.handler.endDocument()
+		handler = saxutils.XMLGenerator(output, 'iso-8859-1')
+		handler.startDocument()
+		self._publish(handler)
+		handler.endDocument()
 		return output.getvalue()
 
-	def _publish(self):
+	def _publish(self, handler):
+		Serializable._publish(self, handler)
+
 		self._write_element("title", self.title)
 		self._write_element("link", self.link)
 		self._write_element("description", self.description)
@@ -124,10 +149,13 @@ class Feed(Serializable):
 		self._write_element("pubDate", self.date(self.pubDate))
 		self._write_element("lastBuildDate", self.date(self.lastBuildDate))
 		self._write_element("generator", self.generator)
+		self._write_element("docs", self.docs)
+
+		if self.cloud is not None:
+			self.cloud._publish(self.handler)
 
 		for item in self.items:
-			item.handler = self.handler
-			item._publish()
+			item._publish(self.handler)
 
 class ElementRequiredError(Exception):
     def __init__(self, element):
