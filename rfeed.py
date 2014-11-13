@@ -7,9 +7,10 @@ class Serializable:
 		self.handler = None
 
 	def _write_element(self, name, value, attributes = {}):
-		self.handler.startElement(name, attributes)
-		self.handler.characters(value)
-		self.handler.endElement(name)
+		if value is not None:
+			self.handler.startElement(name, attributes)
+			self.handler.characters(value)
+			self.handler.endElement(name)
 
 	def _publish(self):
 		# This is the method that subclasses should override
@@ -44,10 +45,21 @@ class Item(Serializable):
 		self.handler.endElement("item")
 
 class Feed(Serializable):
-	def __init__(self, title, items = None):
+	def __init__(self, title, link, description, language = None, copyright = None, managingEditor = None, webMaster = None, items = None):
 		Serializable.__init__(self)
 
+		if title is None: raise ElementRequiredError("title")
+		if link is None: raise ElementRequiredError("link")
+		if description is None: raise ElementRequiredError("description")
+
 		self.title = title
+		self.link = link
+		self.description = description
+		self.language = language
+		self.copyright = copyright
+		self.managingEditor = managingEditor
+		self.webMaster = webMaster
+
 		self.items = [] if items is None else items
 
 	def rss(self):
@@ -60,13 +72,20 @@ class Feed(Serializable):
 
 	def _publish(self):
 		self._write_element("title", self.title)
+		self._write_element("link", self.link)
+		self._write_element("description", self.description)
+		self._write_element("language", self.language)
+		self._write_element("copyright", self.copyright)
+		self._write_element("managingEditor", self.managingEditor)
+		self._write_element("webMaster", self.webMaster)
 
 		for item in self.items:
 			item.handler = self.handler
 			item._publish()
 
-if __name__ == '__main__':
-	item1 = Item("Title 1")
-	item2 = Item("Title 2")
-	feed = Feed("En 3 y 2", [item1, item2])
-	print feed.rss()
+class ElementRequiredError(Exception):
+    def __init__(self, element):
+        self.element = element
+
+    def __str__(self):
+        return 'The element "' + self.element + '" is required and can\'t be None'
