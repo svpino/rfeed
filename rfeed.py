@@ -157,6 +157,8 @@ class SkipHours(Serializable):
 
 		Serializable.__init__(self)
 
+		if hours is None: raise ElementRequiredError("hours")
+
 		self.hours = hours
 
 	def _publish(self, handler):
@@ -169,6 +171,32 @@ class SkipHours(Serializable):
 				self._write_element("hour", hour)
 
 			self.handler.endElement("skipHours")
+
+class SkipDays(Serializable):
+	""" A SkipDays object is a hint for aggregators telling them which days they can skip.
+	More information at http://cyber.law.harvard.edu/rss/skipHoursDays.html#skipdays
+	"""
+	def __init__(self, days):
+		""" Keyword arguments:
+		days -- A list containing up to 7 values. Possible values are Monday, Tuesday, Wednesday, Thursday, Friday, Saturday or Sunday.
+		"""
+
+		Serializable.__init__(self)
+
+		if days is None: raise ElementRequiredError("days")
+
+		self.days = days
+
+	def _publish(self, handler):
+		Serializable._publish(self, handler)
+
+		if self.days:
+			self.handler.startElement("skipDays", {})
+
+			for day in self.days:
+				self._write_element("day", day)
+
+			self.handler.endElement("skipDays")
 
 class iTunes(Serializable):
 	def __init__(self, author, block, category, image, explicit, complete, new_feed_url, owner, subtitle, summary):
@@ -201,8 +229,8 @@ class Item(Serializable):
 		self.handler.endElement("item")
 
 class Feed(Serializable):
-	def __init__(self, title, link, description, language = None, copyright = None, managingEditor = None, webMaster = None, pubDate = None,
-		lastBuildDate = None, generator = None, docs = None, cloud = None, ttl = None, image = None, rating = None, textInput = None, skipHours = None, items = None):
+	def __init__(self, title, link, description, language = None, copyright = None, managingEditor = None, webMaster = None, pubDate = None, lastBuildDate = None, generator = None, 
+		docs = None, cloud = None, ttl = None, image = None, rating = None, textInput = None, skipHours = None, skipDays = None, items = None):
 		""" Keyword arguments:
 		title -- The name of the channel.
 		link -- The URL to the HTML website corresponding to the channel.
@@ -221,6 +249,7 @@ class Feed(Serializable):
 		rating -- Optional. The PICS rating for the channel. See http://www.w3.org/PICS/.
 		textInput -- Optional. Specifies a text input box that can be displayed with the channel.
 		skipHours -- Optional. A hint for aggregators telling them which hours they can skip.
+		skipDays -- Optional. A hint for aggregators telling them which days they can skip.
 		"""
 
 		Serializable.__init__(self)
@@ -246,6 +275,7 @@ class Feed(Serializable):
 		self.rating = rating
 		self.textInput = textInput 
 		self.skipHours = skipHours
+		self.skipDays = skipDays
 
 		self.items = [] if items is None else items
 
@@ -285,6 +315,9 @@ class Feed(Serializable):
 
 		if self.skipHours is not None:
 			self.skipHours._publish(self.handler)
+
+		if self.skipDays is not None:
+			self.skipDays._publish(self.handler)	
 
 		for item in self.items:
 			item._publish(self.handler)

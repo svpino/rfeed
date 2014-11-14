@@ -46,6 +46,15 @@ class FeedTestCase(unittest.TestCase):
 		self.assertTrue(self._element('ttl', '123') in Feed('', '', '', ttl = 123).rss())
 		self.assertTrue(self._element('rating', 'abc') in Feed('', '', '', rating = 'abc').rss())
 
+	def test_if_generator_not_specified_use_default_value(self):
+		# I'm partially checking for the element because the value includes the version number and
+		# changing it will break the test. By just doing a partial match, I make sure the test keeps
+		# working in future versions as well.
+		self.assertTrue(self._element('docs', 'https://github.com/svpino/rfeed/blob/master/README.md') in Feed('', '', '').rss())
+
+	def test_if_docs_not_specified_use_default_value(self):
+		self.assertTrue('<generator>rfeed v' in Feed('', '', '').rss())		
+
 	def test_cloud_element(self):
 		rss = Feed('', '', '', cloud = Cloud('1', 2, '3', '4', '5')).rss()
 		self.assertTrue('<cloud ' in rss)
@@ -117,17 +126,29 @@ class FeedTestCase(unittest.TestCase):
 		self.assertTrue(self._element('hour', '10') in rss)
 		self.assertTrue('</skipHours>' in rss)
 
-	def test_if_generator_not_specified_use_default_value(self):
-		# I'm partially checking for the element because the value includes the version number and
-		# changing it will break the test. By just doing a partial match, I make sure the test keeps
-		# working in future versions as well.
-		self.assertTrue(self._element('docs', 'https://github.com/svpino/rfeed/blob/master/README.md') in Feed('', '', '').rss())
+	def test_skipHours_required_elements_validation(self):
+		with self.assertRaises(ElementRequiredError) as cm:
+			SkipHours(hours = None)
+		self.assertTrue('hours' in str(cm.exception))
 
-	def test_if_docs_not_specified_use_default_value(self):
-		self.assertTrue('<generator>rfeed v' in Feed('', '', '').rss())		
+	def test_skipDays_element(self):
+		rss = Feed('', '', '', skipDays = SkipDays(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Friday'])).rss()
+		self.assertTrue('<skipDays>' in rss)
+		self.assertTrue(self._element('day', 'Monday') in rss)
+		self.assertTrue(self._element('day', 'Tuesday') in rss)
+		self.assertTrue(self._element('day', 'Wednesday') in rss)
+		self.assertTrue(self._element('day', 'Thursday') in rss)
+		self.assertTrue(self._element('day', 'Friday') in rss)
+		self.assertTrue(self._element('day', 'Saturday') in rss)
+		self.assertTrue(self._element('day', 'Friday') in rss)
+		self.assertTrue('</skipDays>' in rss)
+
+	def test_skipDays_required_elements_validation(self):
+		with self.assertRaises(ElementRequiredError) as cm:
+			SkipDays(days = None)
+		self.assertTrue('days' in str(cm.exception))
 
 	def _element(self, element, value, attributes = {}):
-
 		return '<' + element + '>' + value + '</' + element + '>'
 
 if __name__ == '__main__':
