@@ -146,6 +146,30 @@ class TextInput(Serializable):
 
 		self.handler.endElement("textInput")
 
+class SkipHours(Serializable):
+	""" A SkipHours object is a hint for aggregators telling them which hours they can skip.
+	More information at http://cyber.law.harvard.edu/rss/skipHoursDays.html#skiphours
+	"""
+	def __init__(self, hours):
+		""" Keyword arguments:
+		hours -- A list containing up to 24 values between 0 and 23, representing a time in GMT.
+		"""
+
+		Serializable.__init__(self)
+
+		self.hours = hours
+
+	def _publish(self, handler):
+		Serializable._publish(self, handler)
+
+		if self.hours:
+			self.handler.startElement("skipHours", {})
+
+			for hour in self.hours:
+				self._write_element("hour", hour)
+
+			self.handler.endElement("skipHours")
+
 class iTunes(Serializable):
 	def __init__(self, author, block, category, image, explicit, complete, new_feed_url, owner, subtitle, summary):
 		Serializable.__init__(self)
@@ -178,7 +202,7 @@ class Item(Serializable):
 
 class Feed(Serializable):
 	def __init__(self, title, link, description, language = None, copyright = None, managingEditor = None, webMaster = None, pubDate = None,
-		lastBuildDate = None, generator = None, docs = None, cloud = None, ttl = None, image = None, rating = None,  textInput = None, items = None):
+		lastBuildDate = None, generator = None, docs = None, cloud = None, ttl = None, image = None, rating = None, textInput = None, skipHours = None, items = None):
 		""" Keyword arguments:
 		title -- The name of the channel.
 		link -- The URL to the HTML website corresponding to the channel.
@@ -258,6 +282,9 @@ class Feed(Serializable):
 
 		if self.textInput is not None:
 			self.textInput._publish(self.handler)
+
+		if self.skipHours is not None:
+			self.skipHours._publish(self.handler)
 
 		for item in self.items:
 			item._publish(self.handler)

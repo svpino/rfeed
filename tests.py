@@ -67,15 +67,6 @@ class FeedTestCase(unittest.TestCase):
 		self.assertTrue(self._element('description', '6') in rss)
 		self.assertTrue('</image>' in rss)
 
-	def test_textInput_element(self):
-		rss = Feed('', '', '', textInput = TextInput('1', '2', '3', '4')).rss()
-		self.assertTrue('<textInput>' in rss)
-		self.assertTrue(self._element('title', '1') in rss)
-		self.assertTrue(self._element('description', '2') in rss)
-		self.assertTrue(self._element('name', '3') in rss)
-		self.assertTrue(self._element('link', '4') in rss)
-		self.assertTrue('</textInput>' in rss)
-
 	def test_image_required_elements_validation(self):
 		with self.assertRaises(ElementRequiredError) as cm:
 			Image(url = None, title = '', link = '')
@@ -88,6 +79,15 @@ class FeedTestCase(unittest.TestCase):
 		with self.assertRaises(ElementRequiredError) as cm:
 			Image(url = '', title = '', link = None)
 		self.assertTrue('link' in str(cm.exception))
+
+	def test_textInput_element(self):
+		rss = Feed('', '', '', textInput = TextInput('1', '2', '3', '4')).rss()
+		self.assertTrue('<textInput>' in rss)
+		self.assertTrue(self._element('title', '1') in rss)
+		self.assertTrue(self._element('description', '2') in rss)
+		self.assertTrue(self._element('name', '3') in rss)
+		self.assertTrue(self._element('link', '4') in rss)
+		self.assertTrue('</textInput>' in rss)
 
 	def test_textInput_required_elements_validation(self):
 		with self.assertRaises(ElementRequiredError) as cm:
@@ -105,6 +105,17 @@ class FeedTestCase(unittest.TestCase):
 		with self.assertRaises(ElementRequiredError) as cm:
 			TextInput(title = '', description = '', name = '', link = None)
 		self.assertTrue('link' in str(cm.exception))
+
+	def test_skipHours_element(self):
+		rss = Feed('', '', '', skipHours = SkipHours([0, 2, 4, 6, 8, 10])).rss()
+		self.assertTrue('<skipHours>' in rss)
+		self.assertTrue(self._element('hour', '0') in rss)
+		self.assertTrue(self._element('hour', '2') in rss)
+		self.assertTrue(self._element('hour', '4') in rss)
+		self.assertTrue(self._element('hour', '6') in rss)
+		self.assertTrue(self._element('hour', '8') in rss)
+		self.assertTrue(self._element('hour', '10') in rss)
+		self.assertTrue('</skipHours>' in rss)
 
 	def test_if_generator_not_specified_use_default_value(self):
 		# I'm partially checking for the element because the value includes the version number and
