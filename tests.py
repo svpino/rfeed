@@ -43,6 +43,8 @@ class FeedTestCase(unittest.TestCase):
 		self.assertTrue(self._element('lastBuildDate', 'Mon, 01 Dec 2014 10:22:15 GMT') in Feed('', '', '', lastBuildDate = datetime.datetime(2014, 12, 1, 10, 22, 15)).rss())
 		self.assertTrue(self._element('generator', 'Generator goes here') in Feed('', '', '', generator = 'Generator goes here').rss())
 		self.assertTrue(self._element('docs', 'Docs goes here') in Feed('', '', '', docs = 'Docs goes here').rss())
+		self.assertTrue(self._element('ttl', '123') in Feed('', '', '', ttl = 123).rss())
+		self.assertTrue(self._element('rating', 'abc') in Feed('', '', '', rating = 'abc').rss())
 
 	def test_cloud_element(self):
 		rss = Feed('', '', '', cloud = Cloud('1', 2, '3', '4', '5')).rss()
@@ -53,6 +55,56 @@ class FeedTestCase(unittest.TestCase):
 		self.assertTrue('registerProcedure="4"' in rss)
 		self.assertTrue('protocol="5"' in rss)
 		self.assertTrue('</cloud>' in rss)
+
+	def test_image_element(self):
+		rss = Feed('', '', '', image = Image('1', '2', '3', 4, 5, '6')).rss()
+		self.assertTrue('<image>' in rss)
+		self.assertTrue(self._element('url', '1') in rss)
+		self.assertTrue(self._element('title', '2') in rss)
+		self.assertTrue(self._element('link', '3') in rss)
+		self.assertTrue(self._element('width', '4') in rss)
+		self.assertTrue(self._element('height', '5') in rss)
+		self.assertTrue(self._element('description', '6') in rss)
+		self.assertTrue('</image>' in rss)
+
+	def test_textInput_element(self):
+		rss = Feed('', '', '', textInput = TextInput('1', '2', '3', '4')).rss()
+		self.assertTrue('<textInput>' in rss)
+		self.assertTrue(self._element('title', '1') in rss)
+		self.assertTrue(self._element('description', '2') in rss)
+		self.assertTrue(self._element('name', '3') in rss)
+		self.assertTrue(self._element('link', '4') in rss)
+		self.assertTrue('</textInput>' in rss)
+
+	def test_image_required_elements_validation(self):
+		with self.assertRaises(ElementRequiredError) as cm:
+			Image(url = None, title = '', link = '')
+		self.assertTrue('url' in str(cm.exception))
+
+		with self.assertRaises(ElementRequiredError) as cm:
+			Image(url = '', title = None, link = '')
+		self.assertTrue('title' in str(cm.exception))
+
+		with self.assertRaises(ElementRequiredError) as cm:
+			Image(url = '', title = '', link = None)
+		self.assertTrue('link' in str(cm.exception))
+
+	def test_textInput_required_elements_validation(self):
+		with self.assertRaises(ElementRequiredError) as cm:
+			TextInput(title = None, description = '', name = '', link = '')
+		self.assertTrue('title' in str(cm.exception))
+
+		with self.assertRaises(ElementRequiredError) as cm:
+			TextInput(title = '', description = None, name = '', link = '')
+		self.assertTrue('description' in str(cm.exception))
+
+		with self.assertRaises(ElementRequiredError) as cm:
+			TextInput(title = '', description = '', name = None, link = '')
+		self.assertTrue('name' in str(cm.exception))
+
+		with self.assertRaises(ElementRequiredError) as cm:
+			TextInput(title = '', description = '', name = '', link = None)
+		self.assertTrue('link' in str(cm.exception))
 
 	def test_if_generator_not_specified_use_default_value(self):
 		# I'm partially checking for the element because the value includes the version number and

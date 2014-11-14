@@ -18,7 +18,7 @@ class Serializable:
 			self.handler.startElement(name, attributes)
 
 			if value is not None:
-				self.handler.characters(value)
+				self.handler.characters(str(value))
 
 			self.handler.endElement(name)
 
@@ -46,7 +46,18 @@ class Serializable:
             ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][date.month-1], date.year, date.hour, date.minute, date.second)
 
 class Cloud(Serializable):
+	""" A Cloud object specifies a web service that supports the rssCloud interface which can be implemented in HTTP-POST, XML-RPC or SOAP 1.1. 
+	More information at http://cyber.law.harvard.edu/rss/rss.html#ltcloudgtSubelementOfLtchannelgt
+	"""
 	def __init__(self, domain, port, path, registerProcedure, protocol):
+		""" Keyword arguments:
+		domain -- The domain name or IP address of the cloud. 
+		port --	TCP port that the cloud is running on.
+		path -- The location of its responder.
+		registerProcedure -- The name of the procedure to call to request notification.
+		protocol -- Indication of which protocol is to be used.
+		"""
+
 		Serializable.__init__(self)
 
 		self.domain = domain
@@ -59,6 +70,81 @@ class Cloud(Serializable):
 		Serializable._publish(self, handler)		
 
 		self._write_element("cloud", None, { "domain": self.domain, "port": str(self.port), "path": self.path, "registerProcedure": self.registerProcedure, "protocol": self.protocol })
+
+class Image(Serializable):
+	""" An Image object specifies a GIF, JPEG or PNG image that can be displayed with the channel.
+	More information at http://cyber.law.harvard.edu/rss/rss.html#ltimagegtSubelementOfLtchannelgt
+	"""
+	def __init__(self, url, title, link, width = None, height = None, description = None):	
+		""" Keyword arguments:
+		url -- The URL of the image that represents the channel. 
+    	title -- Describes the image. It's used in the ALT attribute of the HTML <img> tag when the channel is rendered in HTML. 
+    	link -- The URL of the site. When the channel is rendered the image is a link to the site.
+    	width -- Optional. The width of the image in pixels.
+    	height -- Optional. The height of the image in pixels.
+    	description -- Optional. Contains text that is included in the TITLE attribute of the link formed around the image in the HTML rendering.
+		"""
+
+		Serializable.__init__(self)
+
+		if url is None: raise ElementRequiredError("url")
+		if title is None: raise ElementRequiredError("title")
+		if link is None: raise ElementRequiredError("link")
+
+		self.url = url
+		self.title = title
+		self.link = link
+		self.width = width
+		self.height = height
+		self.description = description
+        
+	def _publish(self, handler):
+		Serializable._publish(self, handler)
+		self.handler.startElement("image", {})
+
+		self._write_element("url", self.url)
+		self._write_element("title", self.title)
+		self._write_element("link", self.link)
+		self._write_element("width", self.width)
+		self._write_element("height", self.height)
+		self._write_element("description", self.description)
+
+		self.handler.endElement("image")
+
+class TextInput(Serializable):
+	""" A TextInput object specifies a text input box that can be displayed with the channel.
+	More information at http://cyber.law.harvard.edu/rss/rss.html#lttextinputgtSubelementOfLtchannelgt
+	"""
+	def __init__(self, title, description, name, link):
+		""" Keyword arguments:
+		title -- The label of the submit button in the text input area. 
+		description -- Explains the text input area.
+		name -- The name of the text object in the text input area. 
+		link -- The URL of the CGI script that processes text input requests. 
+		"""
+
+		Serializable.__init__(self)
+
+		if title is None: raise ElementRequiredError("title")
+		if description is None: raise ElementRequiredError("description")
+		if name is None: raise ElementRequiredError("name")
+		if link is None: raise ElementRequiredError("link")
+
+		self.title = title
+		self.description = description
+		self.name = name
+		self.link = link
+
+	def _publish(self, handler):
+		Serializable._publish(self, handler)
+		self.handler.startElement("textInput", {})
+
+		self._write_element("title", self.title)
+		self._write_element("description", self.description)
+		self._write_element("name", self.name)
+		self._write_element("link", self.link)
+
+		self.handler.endElement("textInput")
 
 class iTunes(Serializable):
 	def __init__(self, author, block, category, image, explicit, complete, new_feed_url, owner, subtitle, summary):
@@ -91,21 +177,27 @@ class Item(Serializable):
 		self.handler.endElement("item")
 
 class Feed(Serializable):
-	def __init__(self, 
-		title, 						# The name of the channel.
-		link, 						# The URL to the HTML website corresponding to the channel.
-		description, 				# Phrase or sentence describing the channel.
-		language = None, 			# The language the channel is written in.
-		copyright = None, 			# Copyright notice for content in the channel.
-		managingEditor = None, 		# Email address for person responsible for editorial content.
-		webMaster = None, 			# Email address for person responsible for technical issues relating to channel.
-		pubDate = None,				# The publication date for the content in the channel. This should be a datetime in GMT format.
-		lastBuildDate = None,		# The last time the content of the channel changed. This should be a datetime in GMT format.
-		generator = None,			# A string indicating the program used to generate the channel.
-		docs = None,				# A URL that points to the documentation for the format used in the RSS file.
-		cloud = None,				# Allows processes to register with a cloud to be notified of updates to the channel. This is a Cloud object.
-
-		items = None):
+	def __init__(self, title, link, description, language = None, copyright = None, managingEditor = None, webMaster = None, pubDate = None,
+		lastBuildDate = None, generator = None, docs = None, cloud = None, ttl = None, image = None, rating = None,  textInput = None, items = None):
+		""" Keyword arguments:
+		title -- The name of the channel.
+		link -- The URL to the HTML website corresponding to the channel.
+		description -- Phrase or sentence describing the channel.
+		language -- Optional. The language the channel is written in.
+		copyright -- Optional. Copyright notice for content in the channel.
+		managingEditor -- Optional. Email address for person responsible for editorial content.
+		webMaster -- Optional. Email address for person responsible for technical issues relating to channel.
+		pubDate -- Optional. The publication date for the content in the channel. This should be a datetime in GMT format.
+		lastBuildDate -- Optional. The last time the content of the channel changed. This should be a datetime in GMT format.
+		generator -- Optional. A string indicating the program used to generate the channel.
+		docs -- Optional. A URL that points to the documentation for the format used in the RSS file.
+		cloud -- Optional. Allows processes to register with a cloud to be notified of updates to the channel. This is a Cloud object.
+		ttl -- Optional. The number of minutes that indicates how long a channel can be cached before refreshing from the source. This should be an integer value.
+		image -- Optional. Specifies an image that can be displayed with the channel. This is an Image object.
+		rating -- Optional. The PICS rating for the channel. See http://www.w3.org/PICS/.
+		textInput -- Optional. Specifies a text input box that can be displayed with the channel.
+		skipHours -- Optional. A hint for aggregators telling them which hours they can skip.
+		"""
 
 		Serializable.__init__(self)
 
@@ -125,6 +217,11 @@ class Feed(Serializable):
 		self.generator = _generator if generator is None else generator
 		self.docs = _docs if docs is None else docs
 		self.cloud = cloud
+		self.ttl = ttl
+		self.image = image
+		self.rating = rating
+		self.textInput = textInput 
+		self.skipHours = skipHours
 
 		self.items = [] if items is None else items
 
@@ -150,9 +247,17 @@ class Feed(Serializable):
 		self._write_element("lastBuildDate", self.date(self.lastBuildDate))
 		self._write_element("generator", self.generator)
 		self._write_element("docs", self.docs)
+		self._write_element("ttl", self.ttl)
+		self._write_element("rating", self.rating)
 
 		if self.cloud is not None:
 			self.cloud._publish(self.handler)
+
+		if self.image is not None:
+			self.image._publish(self.handler)
+
+		if self.textInput is not None:
+			self.textInput._publish(self.handler)
 
 		for item in self.items:
 			item._publish(self.handler)
