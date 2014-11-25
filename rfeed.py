@@ -226,19 +226,34 @@ class SkipDays(Serializable):
 
 			self.handler.endElement("skipDays")
 
+class iTunes(Serializable):
+	def __init__(self, author, block, category, image, explicit, complete, new_feed_url, owner, subtitle, summary):
+		Serializable.__init__(self)
+
+		self.author = author
+		self.block = block
+		self.category = category
+		self.image = image
+		self.explicit = explicit
+		self.complete = complete
+		self.new_feed_url = new_feed_url
+		self.owner = owner
+		self.subtitle = subtitle
+		self.summary = summary
+
 class Item(Serializable):
 	""" An Item object may represent a "story" - much like a story in a newspaper or magazine; if so its description is a synopsis of the story, and the link points to the full story. 
 	An item may also be complete in itself, if so, the description contains the text, and the link and title may be omitted. All elements of an item are optional, however at least one 
 	of title or description must be present.
 	More information at http://cyber.law.harvard.edu/rss/rss.html#hrelementsOfLtitemgt
 	"""
-	def __init__(self, title = None, link = None, description = None, author = None, category = None, comments = None, enclosure = None, guid = None, pubDate = None, source = None):
+	def __init__(self, title = None, link = None, description = None, author = None, categories = None, comments = None, enclosure = None, guid = None, pubDate = None, source = None):
 		""" Keyword arguments:
 		title -- Optional. The title of the item.
 		link  -- Optional. The URL of the item.
 		description -- Optional. The item synopsis.
 		author -- Optional. Email address of the author of the item.
-		category -- Optional. Includes the item in one or more categories.
+		categories -- Optional. Includes the item in one or more categories.
 		comments -- Optional. URL of a page for comments relating to the item.
 		enclosure -- Optional. Describes a media object that is attached to the item.
 		guid -- Optional. A string that uniquely identifies the item.
@@ -255,12 +270,18 @@ class Item(Serializable):
 		self.link = link
 		self.description = description
 		self.author = author
-		self.category = category
 		self.comments = comments
 		self.enclosure = enclosure
 		self.guid = guid
 		self.pubDate = pubDate
 		self.source = source
+
+		self.categories = [] if categories is None else categories
+
+		if isinstance(self.categories, Category):
+			self.categories = [self.categories]
+		elif isinstance(self.categories, basestring):
+			self.categories = [Category(self.categories)]
 
 	def _publish(self, handler):
 		Serializable._publish(self, handler)
@@ -269,23 +290,13 @@ class Item(Serializable):
 
 		self._write_element("title", self.title)
 
+		for category in self.categories:
+			if isinstance(category, basestring):
+				category = Category(category)
+			category._publish(self.handler)
+
 		self.handler.endElement("item")
 
-
-class iTunes(Serializable):
-	def __init__(self, author, block, category, image, explicit, complete, new_feed_url, owner, subtitle, summary):
-		Serializable.__init__(self)
-
-		self.author = author
-		self.block = block
-		self.category = category
-		self.image = image
-		self.explicit = explicit
-		self.complete = complete
-		self.new_feed_url = new_feed_url
-		self.owner = owner
-		self.subtitle = subtitle
-		self.summary = summary
 
 class Feed(Serializable):
 	def __init__(self, title, link, description, language = None, copyright = None, managingEditor = None, webMaster = None, pubDate = None, lastBuildDate = None, categories = None, 

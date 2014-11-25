@@ -117,14 +117,14 @@ class FeedTestCase(unittest.TestCase):
 		rss = Feed('', '', '', categories = '123').rss()
 		self.assertTrue(self._element('category', '123') in rss)
 
-	def test_feed_categories_as_string_array_element(self):
-		rss = Feed('', '', '', categories = ['123', '234', '345']).rss()
+	def test_feed_categories_as_category_array_element(self):
+		rss = Feed('', '', '', categories = [Category('123'), Category('234'), Category('345')]).rss()
 		self.assertTrue(self._element('category', '123') in rss)
 		self.assertTrue(self._element('category', '234') in rss)
 		self.assertTrue(self._element('category', '345') in rss)
 
-	def test_feed_categories_as_category_array_element(self):
-		rss = Feed('', '', '', categories = [Category('123'), Category('234'), Category('345')]).rss()
+	def test_feed_categories_as_string_array_element(self):
+		rss = Feed('', '', '', categories = ['123', '234', '345']).rss()
 		self.assertTrue(self._element('category', '123') in rss)
 		self.assertTrue(self._element('category', '234') in rss)
 		self.assertTrue(self._element('category', '345') in rss)
@@ -169,12 +169,6 @@ class FeedTestCase(unittest.TestCase):
 			SkipDays(days = None)
 		self.assertTrue('days' in str(cm.exception))
 
-	def test_item_required_elements_validation(self):
-		with self.assertRaises(ElementRequiredError) as cm:
-			Item()
-		self.assertTrue('title' in str(cm.exception))
-		self.assertTrue('description' in str(cm.exception))
-
 	def test_cloud_required_elements_validation(self):
 		with self.assertRaises(ElementRequiredError) as cm:
 			Cloud(domain = None, port = '', path = '', registerProcedure = '', protocol = '')
@@ -200,6 +194,34 @@ class FeedTestCase(unittest.TestCase):
 		with self.assertRaises(ElementRequiredError) as cm:
 			Category(category = None)
 		self.assertTrue('category' in str(cm.exception))
+
+	def test_item_required_elements_validation(self):
+		with self.assertRaises(ElementRequiredError) as cm:
+			Item()
+		self.assertTrue('title' in str(cm.exception))
+		self.assertTrue('description' in str(cm.exception))
+
+	def test_item_categories_as_single_category_element(self):
+		rss = Feed('', '', '', items = [Item(title='abc', categories = Category('123', domain = '234'))]).rss()
+		self.assertTrue('<category' in rss)
+		self.assertTrue('domain="234"' in rss)
+		self.assertTrue('>123</category>' in rss)
+
+	def test_item_categories_as_single_string_element(self):
+		rss = Feed('', '', '', items = [Item(title='abc', categories = '123')]).rss()
+		self.assertTrue(self._element('category', '123') in rss)
+
+	def test_item_categories_as_category_array_element(self):
+		rss = Feed('', '', '', items = [Item(title='abc', categories = [Category('123'), Category('234'), Category('345')])]).rss()
+		self.assertTrue(self._element('category', '123') in rss)
+		self.assertTrue(self._element('category', '234') in rss)
+		self.assertTrue(self._element('category', '345') in rss)
+
+	def test_item_categories_as_string_array_element(self):
+		rss = Feed('', '', '', items = [Item(title='abc', categories = ['123', '234', '345'])]).rss()
+		self.assertTrue(self._element('category', '123') in rss)
+		self.assertTrue(self._element('category', '234') in rss)
+		self.assertTrue(self._element('category', '345') in rss)
 
 	def _element(self, element, value, attributes = {}):
 		return '<' + element + '>' + value + '</' + element + '>'
