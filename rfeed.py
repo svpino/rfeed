@@ -45,6 +45,28 @@ class Serializable:
 		return "%s, %02d %s %04d %02d:%02d:%02d GMT" % (["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][date.weekday()], date.day,
             ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][date.month-1], date.year, date.hour, date.minute, date.second)
 
+class Category(Serializable):
+	""" A Category object specify one or more categories that the channel or item belongs to.
+	More information at http://cyber.law.harvard.edu/rss/rss.html#ltcategorygtSubelementOfLtitemgt
+	"""
+	def __init__(self, category, domain = None):
+		""" Keyword arguments:
+		category --	The name of the category
+		domain -- Optional. A string that identifies a categorization taxonomy. 
+		"""
+
+		Serializable.__init__(self)
+
+		if category is None: raise ElementRequiredError("category")
+
+		self.category = category
+		self.domain = domain
+
+	def _publish(self, handler):
+		Serializable._publish(self, handler)
+		
+		self._write_element("category", self.category, { "domain": self.domain } if self.domain is not None else {})
+
 class Cloud(Serializable):
 	""" A Cloud object specifies a web service that supports the rssCloud interface which can be implemented in HTTP-POST, XML-RPC or SOAP 1.1. 
 	More information at http://cyber.law.harvard.edu/rss/rss.html#ltcloudgtSubelementOfLtchannelgt
@@ -59,6 +81,12 @@ class Cloud(Serializable):
 		"""
 
 		Serializable.__init__(self)
+
+		if domain is None: raise ElementRequiredError("domain")
+		if port is None: raise ElementRequiredError("port")
+		if path is None: raise ElementRequiredError("path")
+		if registerProcedure is None: raise ElementRequiredError("registerProcedure")
+		if protocol is None: raise ElementRequiredError("protocol")
 
 		self.domain = domain
 		self.port = port
@@ -198,6 +226,52 @@ class SkipDays(Serializable):
 
 			self.handler.endElement("skipDays")
 
+class Item(Serializable):
+	""" An Item object may represent a "story" - much like a story in a newspaper or magazine; if so its description is a synopsis of the story, and the link points to the full story. 
+	An item may also be complete in itself, if so, the description contains the text, and the link and title may be omitted. All elements of an item are optional, however at least one 
+	of title or description must be present.
+	More information at http://cyber.law.harvard.edu/rss/rss.html#hrelementsOfLtitemgt
+	"""
+	def __init__(self, title = None, link = None, description = None, author = None, category = None, comments = None, enclosure = None, guid = None, pubDate = None, source = None):
+		""" Keyword arguments:
+		title -- Optional. The title of the item.
+		link  -- Optional. The URL of the item.
+		description -- Optional. The item synopsis.
+		author -- Optional. Email address of the author of the item.
+		category -- Optional. Includes the item in one or more categories.
+		comments -- Optional. URL of a page for comments relating to the item.
+		enclosure -- Optional. Describes a media object that is attached to the item.
+		guid -- Optional. A string that uniquely identifies the item.
+		pubDate -- Optional. Indicates when the item was published.
+		source -- Optional. The RSS channel that the item came from.
+		"""
+
+		Serializable.__init__(self)
+
+		if title is None and description is None:
+			raise ElementRequiredError("title", "description")
+
+		self.title = title
+		self.link = link
+		self.description = description
+		self.author = author
+		self.category = category
+		self.comments = comments
+		self.enclosure = enclosure
+		self.guid = guid
+		self.pubDate = pubDate
+		self.source = source
+
+	def _publish(self, handler):
+		Serializable._publish(self, handler)
+
+		self.handler.startElement("item", {})
+
+		self._write_element("title", self.title)
+
+		self.handler.endElement("item")
+
+
 class iTunes(Serializable):
 	def __init__(self, author, block, category, image, explicit, complete, new_feed_url, owner, subtitle, summary):
 		Serializable.__init__(self)
@@ -213,24 +287,9 @@ class iTunes(Serializable):
 		self.subtitle = subtitle
 		self.summary = summary
 
-class Item(Serializable):
-	def __init__(self, title):
-		Serializable.__init__(self)
-
-		self.title = title
-
-	def _publish(self, handler):
-		Serializable._publish(self, handler)
-
-		self.handler.startElement("item", {})
-
-		self._write_element("title", self.title)
-
-		self.handler.endElement("item")
-
 class Feed(Serializable):
-	def __init__(self, title, link, description, language = None, copyright = None, managingEditor = None, webMaster = None, pubDate = None, lastBuildDate = None, generator = None, 
-		docs = None, cloud = None, ttl = None, image = None, rating = None, textInput = None, skipHours = None, skipDays = None, items = None):
+	def __init__(self, title, link, description, language = None, copyright = None, managingEditor = None, webMaster = None, pubDate = None, lastBuildDate = None, categories = None, 
+		generator = None, docs = None, cloud = None, ttl = None, image = None, rating = None, textInput = None, skipHours = None, skipDays = None, items = None):
 		""" Keyword arguments:
 		title -- The name of the channel.
 		link -- The URL to the HTML website corresponding to the channel.
@@ -241,6 +300,7 @@ class Feed(Serializable):
 		webMaster -- Optional. Email address for person responsible for technical issues relating to channel.
 		pubDate -- Optional. The publication date for the content in the channel. This should be a datetime in GMT format.
 		lastBuildDate -- Optional. The last time the content of the channel changed. This should be a datetime in GMT format.
+		categories -- Optional. Specify one or more categories that the channel belongs to.
 		generator -- Optional. A string indicating the program used to generate the channel.
 		docs -- Optional. A URL that points to the documentation for the format used in the RSS file.
 		cloud -- Optional. Allows processes to register with a cloud to be notified of updates to the channel. This is a Cloud object.
@@ -277,6 +337,13 @@ class Feed(Serializable):
 		self.skipHours = skipHours
 		self.skipDays = skipDays
 
+		self.categories = [] if categories is None else categories
+
+		if isinstance(self.categories, Category):
+			self.categories = [self.categories]
+		elif isinstance(self.categories, basestring):
+			self.categories = [Category(self.categories)]
+
 		self.items = [] if items is None else items
 
 	def rss(self):
@@ -304,6 +371,11 @@ class Feed(Serializable):
 		self._write_element("ttl", self.ttl)
 		self._write_element("rating", self.rating)
 
+		for category in self.categories:
+			if isinstance(category, basestring):
+				category = Category(category)
+			category._publish(self.handler)
+
 		if self.cloud is not None:
 			self.cloud._publish(self.handler)
 
@@ -323,8 +395,13 @@ class Feed(Serializable):
 			item._publish(self.handler)
 
 class ElementRequiredError(Exception):
-    def __init__(self, element):
-        self.element = element
+    def __init__(self, element1, element2 = None):
+        self.element1 = element1
+        self.element2 = element2
 
     def __str__(self):
-        return 'The element "' + self.element + '" is required and can\'t be None'
+		if self.element2 is not None:
+			return 'Either "' + self.element1 + '" or "' + self.element2 + '" must be defined'	
+
+		return '"' + self.element1 + '" must be defined'
+
