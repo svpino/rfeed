@@ -226,6 +226,31 @@ class SkipDays(Serializable):
 
 			self.handler.endElement("skipDays")
 
+class Enclosure(Serializable):
+	""" An Enclosure object describes a media object that is attached to the item.
+	More information at http://cyber.law.harvard.edu/rss/rss.html#ltenclosuregtSubelementOfLtitemgt
+	"""
+	def __init__(self, url, length, type):
+		""" Keyword arguments:
+		url -- Indicates where the enclosure is located.
+		length -- Specifies how big the enclosure is in bytes.
+		type -- Specifies the standard MIME type of the enclosure.
+		"""
+		Serializable.__init__(self)
+
+		if url is None: raise ElementRequiredError("url")
+		if length is None: raise ElementRequiredError("length")
+		if type is None: raise ElementRequiredError("type")
+
+		self.url = url
+		self.length = length
+		self.type = type
+
+	def _publish(self, handler):
+		Serializable._publish(self, handler)
+
+		self._write_element("enclosure", None, { "url": self.url, "length": str(self.length), "type": self.type })
+
 class iTunes(Serializable):
 	def __init__(self, author, block, category, image, explicit, complete, new_feed_url, owner, subtitle, summary):
 		Serializable.__init__(self)
@@ -289,6 +314,10 @@ class Item(Serializable):
 		self.handler.startElement("item", {})
 
 		self._write_element("title", self.title)
+		self._write_element("link", self.link)
+		self._write_element("description", self.description)
+		self._write_element("author", self.author)
+		self._write_element("comments", self.comments)
 
 		for category in self.categories:
 			if isinstance(category, basestring):

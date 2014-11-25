@@ -33,7 +33,7 @@ class FeedTestCase(unittest.TestCase):
 			Feed(title = '', link = '', description = None)
 		self.assertTrue('description' in str(cm.exception))
 
-	def test_feed_optional_elements_are_present(self):
+	def test_feed_optional_elements(self):
 		self.assertTrue(self._element('language', 'en-us') in Feed('', '', '', language = 'en-us').rss())
 		self.assertTrue(self._element('copyright', 'Copyright 2014') in Feed('', '', '', copyright = 'Copyright 2014').rss())
 		self.assertTrue(self._element('managingEditor', 'John Doe') in Feed('', '', '', managingEditor = 'John Doe').rss())
@@ -169,6 +169,19 @@ class FeedTestCase(unittest.TestCase):
 			SkipDays(days = None)
 		self.assertTrue('days' in str(cm.exception))
 
+	def test_enclosure_required_elements_validation(self):
+		with self.assertRaises(ElementRequiredError) as cm:
+			Enclosure(url = None, length = 123, type = '')
+		self.assertTrue('url' in str(cm.exception))
+
+		with self.assertRaises(ElementRequiredError) as cm:
+			Enclosure(url = '', length = None, type = '')
+		self.assertTrue('length' in str(cm.exception))
+
+		with self.assertRaises(ElementRequiredError) as cm:
+			Enclosure(url = '', length = 123, type = None)
+		self.assertTrue('type' in str(cm.exception))
+
 	def test_cloud_required_elements_validation(self):
 		with self.assertRaises(ElementRequiredError) as cm:
 			Cloud(domain = None, port = '', path = '', registerProcedure = '', protocol = '')
@@ -200,6 +213,13 @@ class FeedTestCase(unittest.TestCase):
 			Item()
 		self.assertTrue('title' in str(cm.exception))
 		self.assertTrue('description' in str(cm.exception))
+
+	def test_item_optional_elements(self):
+		self.assertTrue(self._element('title', '123') in Feed('', '', '', items = [Item(title='123')]).rss())
+		self.assertTrue(self._element('link', '123') in Feed('', '', '', items = [Item(title = '', link='123')]).rss())
+		self.assertTrue(self._element('description', '123') in Feed('', '', '', items = [Item(description='123')]).rss())
+		self.assertTrue(self._element('author', '123') in Feed('', '', '', items = [Item(title = '', author='123')]).rss())
+		self.assertTrue(self._element('comments', '123') in Feed('', '', '', items = [Item(title = '', comments='123')]).rss())
 
 	def test_item_categories_as_single_category_element(self):
 		rss = Feed('', '', '', items = [Item(title='abc', categories = Category('123', domain = '234'))]).rss()
