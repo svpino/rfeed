@@ -243,6 +243,14 @@ class FeedTestCase(unittest.TestCase):
 		self.assertTrue(self._element('category', '234') in rss)
 		self.assertTrue(self._element('category', '345') in rss)
 
+	def test_item_enclosure_element(self):
+		rss = Feed('', '', '', items = [Item(title = '', enclosure = Enclosure(url = '123', length = 234, type = '345'))]).rss()
+		self.assertTrue('<enclosure ' in rss)
+		self.assertTrue('url="123"' in rss)
+		self.assertTrue('length="234"' in rss)
+		self.assertTrue('type="345"' in rss)
+		self.assertTrue('</enclosure>' in rss)
+
 	def _element(self, element, value, attributes = {}):
 		return '<' + element + '>' + value + '</' + element + '>'
 

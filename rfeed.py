@@ -324,6 +324,9 @@ class Item(Serializable):
 				category = Category(category)
 			category._publish(self.handler)
 
+		if self.enclosure is not None:
+			self.enclosure._publish(self.handler)
+
 		self.handler.endElement("item")
 
 
