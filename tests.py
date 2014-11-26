@@ -24,7 +24,6 @@ class FeedTestCase(BaseTestCase):
 		rss = Feed('', '', '').rss()
 		self.assertTrue('<rss' in rss)		
 		self.assertTrue('version="2.0"' in rss)
-		self.assertTrue('xmlns:atom="http://www.w3.org/2005/Atom"' in rss)
 		self.assertTrue('</rss>' in rss)
 
 	def test_channel_element(self):
@@ -70,12 +69,6 @@ class FeedTestCase(BaseTestCase):
 
 	def test_if_docs_not_specified_use_default_value(self):
 		self.assertTrue('<generator>rfeed v' in Feed('', '', '').rss())		
-
-	def test_atom_link_element(self):
-		rss = Feed('', '', '', feedLink = '123').rss()
-		self.assertTrue('<atom:link ' in rss)
-		self.assertTrue('href="123"' in rss)
-		self.assertTrue('</atom:link>' in rss)
 
 	def test_cloud_element(self):
 		rss = Feed('', '', '', cloud = Cloud('1', 2, '3', '4', '5')).rss()
