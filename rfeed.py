@@ -318,6 +318,7 @@ class Item(Serializable):
 		self._write_element("description", self.description)
 		self._write_element("author", self.author)
 		self._write_element("comments", self.comments)
+		self._write_element("pubDate", self.date(self.pubDate))
 
 		for category in self.categories:
 			if isinstance(category, basestring):

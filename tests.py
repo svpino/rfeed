@@ -220,6 +220,7 @@ class FeedTestCase(unittest.TestCase):
 		self.assertTrue(self._element('description', '123') in Feed('', '', '', items = [Item(description='123')]).rss())
 		self.assertTrue(self._element('author', '123') in Feed('', '', '', items = [Item(title = '', author='123')]).rss())
 		self.assertTrue(self._element('comments', '123') in Feed('', '', '', items = [Item(title = '', comments='123')]).rss())
+		self.assertTrue(self._element('pubDate', 'Thu, 13 Nov 2014 08:00:00 GMT') in Feed('', '', '', items = [Item(title = '', pubDate = datetime.datetime(2014, 11, 13, 8, 0, 0))]).rss())
 
 	def test_item_categories_as_single_category_element(self):
 		rss = Feed('', '', '', items = [Item(title='abc', categories = Category('123', domain = '234'))]).rss()
