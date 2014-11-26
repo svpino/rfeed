@@ -208,6 +208,19 @@ class FeedTestCase(unittest.TestCase):
 			Category(category = None)
 		self.assertTrue('category' in str(cm.exception))
 
+	def test_guid_required_elements_validation(self):
+		with self.assertRaises(ElementRequiredError) as cm:
+			Guid(guid = None)
+		self.assertTrue('guid' in str(cm.exception))
+
+	def test_guid_ispermalink_should_be_true_by_default(self):
+		guid = Guid(guid = '123')
+		self.assertTrue(guid.isPermaLink)
+
+	def test_guid_ispermalink_should_be_true_if_none_is_provided(self):
+		guid = Guid(guid = '123', isPermaLink = None)
+		self.assertTrue(guid.isPermaLink)
+
 	def test_item_required_elements_validation(self):
 		with self.assertRaises(ElementRequiredError) as cm:
 			Item()
@@ -251,6 +264,12 @@ class FeedTestCase(unittest.TestCase):
 		self.assertTrue('length="234"' in rss)
 		self.assertTrue('type="345"' in rss)
 		self.assertTrue('</enclosure>' in rss)
+
+	def test_item_guid_element(self):
+		rss = Feed('', '', '', items = [Item(title = '', guid = Guid(guid = '123', isPermaLink = False))]).rss()
+		self.assertTrue('<guid ' in rss)
+		self.assertTrue('isPermaLink="false"' in rss)
+		self.assertTrue('123</guid>' in rss)
 
 	def _element(self, element, value, attributes = {}):
 		return '<' + element + '>' + value + '</' + element + '>'

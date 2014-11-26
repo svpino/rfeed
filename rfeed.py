@@ -251,6 +251,27 @@ class Enclosure(Serializable):
 
 		self._write_element("enclosure", None, { "url": self.url, "length": str(self.length), "type": self.type })
 
+class Guid(Serializable):
+	""" A Guid object represents a string that uniquely identifies the item.
+	More information at http://cyber.law.harvard.edu/rss/rss.html#ltguidgtSubelementOfLtitemgt
+	"""
+	def __init__(self, guid, isPermaLink = True):
+		""" Keyword arguments:
+		guid -- This is a string that uniquely identifies the item. When present, an aggregator may choose to use this string to determine if an item is new.
+		isPermaLink -- Indicates whether the guid is a url that points to the item.
+		"""
+		Serializable.__init__(self)
+
+		if guid is None: raise ElementRequiredError("guid")
+
+		self.guid = guid
+		self.isPermaLink = True if isPermaLink is None else isPermaLink
+
+	def _publish(self, handler):
+		Serializable._publish(self, handler)
+
+		self._write_element("guid", self.guid, { "isPermaLink": "true" if self.isPermaLink else "false" })
+
 class iTunes(Serializable):
 	def __init__(self, author, block, category, image, explicit, complete, new_feed_url, owner, subtitle, summary):
 		Serializable.__init__(self)
@@ -327,6 +348,9 @@ class Item(Serializable):
 
 		if self.enclosure is not None:
 			self.enclosure._publish(self.handler)
+
+		if self.guid is not None:
+			self.guid._publish(self.handler)
 
 		self.handler.endElement("item")
 
