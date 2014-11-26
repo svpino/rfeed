@@ -4,14 +4,14 @@ from time import gmtime, strftime
 from datetime import datetime
 from rfeed import *
 
-class SerializableTestCase(unittest.TestCase):
+class ExtensionTestCase(unittest.TestCase):
 
 	def test_date(self):
-		self.assertEquals('Thu, 13 Nov 2014 08:00:00 GMT', Serializable().date(datetime.datetime(2014, 11, 13, 8, 0, 0)))
-		self.assertEquals('Mon, 01 Dec 2014 10:22:15 GMT', Serializable().date(datetime.datetime(2014, 12, 1, 10, 22, 15)))
+		self.assertEquals('Thu, 13 Nov 2014 08:00:00 GMT', Extension().date(datetime.datetime(2014, 11, 13, 8, 0, 0)))
+		self.assertEquals('Mon, 01 Dec 2014 10:22:15 GMT', Extension().date(datetime.datetime(2014, 12, 1, 10, 22, 15)))
 
 	def test_date_returns_none_if_date_is_none(self):
-		self.assertIsNone(Serializable().date(None))
+		self.assertIsNone(Extension().date(None))
 
 class BaseTestCase(unittest.TestCase):
 
@@ -224,6 +224,29 @@ class FeedTestCase(BaseTestCase):
 			Category(category = None)
 		self.assertTrue('category' in str(cm.exception))
 
+	def test_add_extension(self):
+		feed = Feed('', '', '')
+		self.assertEquals(0, len(feed.extensions))
+		feed.add_extension(Category(''))
+		self.assertEquals(1, len(feed.extensions))
+
+	def test_add_extension_raises_error_if_extension_is_not_serializable(self):
+		feed = Feed('', '', '')
+		with self.assertRaises(TypeError) as cm:
+			feed.add_extension(Fake())
+
+	def test_get_attributes_should_include_namespaces(self):
+		feed = Feed('', '', '')
+		feed.add_extension(MockExtension1())
+		rss = feed.rss()
+		self.assertTrue('name="value"' in rss)
+
+	def test_get_attributes_should_work_fine_with_no_namespaces(self):
+		feed = Feed('', '', '')
+		feed.add_extension(MockExtension2())
+		rss = feed.rss()
+		self.assertTrue('version="2.0"' in rss)
+
 class ItemTestCase(BaseTestCase):
 
 	def test_required_elements_validation(self):
@@ -303,6 +326,30 @@ class ItemTestCase(BaseTestCase):
 	def test_guid_ispermalink_should_be_true_if_none_is_provided(self):
 		guid = Guid(guid = '123', isPermaLink = None)
 		self.assertTrue(guid.isPermaLink)
+
+class iTunesTestCase(BaseTestCase):
+	def test_sample(self):
+		pass
+
+class MockExtension1(Extension):
+	def __init__(self):
+		Extension.__init__(self)
+
+	def get_namespace(self):
+		return {"name": "value"}
+
+	def _publish(self, handler):
+		Extension._publish(self, handler)
+
+class MockExtension2(Extension):
+	def __init__(self):
+		Extension.__init__(self)
+
+	def _publish(self, handler):
+		Extension._publish(self, handler)
+
+class Fake:
+	pass
 
 if __name__ == '__main__':
     unittest.main()
