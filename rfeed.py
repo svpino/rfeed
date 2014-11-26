@@ -380,11 +380,12 @@ class Item(Serializable):
 		self.handler.endElement("item")
 
 class Feed(Serializable):
-	def __init__(self, title, link, description, language = None, copyright = None, managingEditor = None, webMaster = None, pubDate = None, lastBuildDate = None, categories = None, 
+	def __init__(self, title, link, description, feedLink = None, language = None, copyright = None, managingEditor = None, webMaster = None, pubDate = None, lastBuildDate = None, categories = None, 
 		generator = None, docs = None, cloud = None, ttl = None, image = None, rating = None, textInput = None, skipHours = None, skipDays = None, items = None):
 		""" Keyword arguments:
 		title -- The name of the channel.
 		link -- The URL to the HTML website corresponding to the channel.
+		feedLink -- The URL to the RSS feed.
 		description -- Phrase or sentence describing the channel.
 		language -- Optional. The language the channel is written in.
 		copyright -- Optional. Copyright notice for content in the channel.
@@ -413,6 +414,7 @@ class Feed(Serializable):
 		self.title = title
 		self.link = link
 		self.description = description
+		self.feedLink = feedLink
 		self.language = language
 		self.copyright = copyright
 		self.managingEditor = managingEditor
@@ -449,8 +451,11 @@ class Feed(Serializable):
 	def _publish(self, handler):
 		Serializable._publish(self, handler)
 
-		handler.startElement("rss", {"version": "2.0"})
+		handler.startElement("rss", {"version": "2.0", "xmlns:atom": "http://www.w3.org/2005/Atom"})
 		handler.startElement("channel", {})
+
+		if self.feedLink is not None:
+ 			self._write_element("atom:link", None, {"href": self.feedLink, "rel": "self", "type": "application/rss+xml"})
 
 		self._write_element("title", self.title)
 		self._write_element("link", self.link)

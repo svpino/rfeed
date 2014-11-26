@@ -20,22 +20,24 @@ class BaseTestCase(unittest.TestCase):
 
 class FeedTestCase(BaseTestCase):
 
-	def test_feed_rss_element(self):
+	def test_rss_element(self):
 		rss = Feed('', '', '').rss()
-		self.assertTrue('<rss version="2.0">' in rss)		
+		self.assertTrue('<rss' in rss)		
+		self.assertTrue('version="2.0"' in rss)
+		self.assertTrue('xmlns:atom="http://www.w3.org/2005/Atom"' in rss)
 		self.assertTrue('</rss>' in rss)
 
-	def test_feed_channel_element(self):
+	def test_channel_element(self):
 		rss = Feed('', '', '').rss()
 		self.assertTrue('<channel>' in rss)
 		self.assertTrue('</channel>' in rss)
 
-	def test_feed_required_elements(self):
+	def test_required_elements(self):
 		self.assertTrue(self._element('title', 'This is a sample title') in Feed('This is a sample title', '', '').rss())
 		self.assertTrue(self._element('link', 'https://www.google.com') in Feed('', 'https://www.google.com', '').rss())
 		self.assertTrue(self._element('description', 'This is a sample description') in Feed('', '', 'This is a sample description').rss())
 
-	def test_feed_required_elements_validation(self):
+	def test_required_elements_validation(self):
 		with self.assertRaises(ElementRequiredError) as cm:
 			Feed(title = None, link = '', description = '')
 		self.assertTrue('title' in str(cm.exception))
@@ -48,7 +50,7 @@ class FeedTestCase(BaseTestCase):
 			Feed(title = '', link = '', description = None)
 		self.assertTrue('description' in str(cm.exception))
 
-	def test_feed_optional_elements(self):
+	def test_optional_elements(self):
 		self.assertTrue(self._element('language', 'en-us') in Feed('', '', '', language = 'en-us').rss())
 		self.assertTrue(self._element('copyright', 'Copyright 2014') in Feed('', '', '', copyright = 'Copyright 2014').rss())
 		self.assertTrue(self._element('managingEditor', 'John Doe') in Feed('', '', '', managingEditor = 'John Doe').rss())
@@ -60,16 +62,22 @@ class FeedTestCase(BaseTestCase):
 		self.assertTrue(self._element('ttl', '123') in Feed('', '', '', ttl = 123).rss())
 		self.assertTrue(self._element('rating', 'abc') in Feed('', '', '', rating = 'abc').rss())
 
-	def test_feed_if_generator_not_specified_use_default_value(self):
+	def test_if_generator_not_specified_use_default_value(self):
 		# I'm partially checking for the element because the value includes the version number and
 		# changing it will break the test. By just doing a partial match, I make sure the test keeps
 		# working in future versions as well.
 		self.assertTrue(self._element('docs', 'https://github.com/svpino/rfeed/blob/master/README.md') in Feed('', '', '').rss())
 
-	def test_feed_if_docs_not_specified_use_default_value(self):
+	def test_if_docs_not_specified_use_default_value(self):
 		self.assertTrue('<generator>rfeed v' in Feed('', '', '').rss())		
 
-	def test_feed_cloud_element(self):
+	def test_atom_link_element(self):
+		rss = Feed('', '', '', feedLink = '123').rss()
+		self.assertTrue('<atom:link ' in rss)
+		self.assertTrue('href="123"' in rss)
+		self.assertTrue('</atom:link>' in rss)
+
+	def test_cloud_element(self):
 		rss = Feed('', '', '', cloud = Cloud('1', 2, '3', '4', '5')).rss()
 		self.assertTrue('<cloud ' in rss)
 		self.assertTrue('domain="1"' in rss)
@@ -79,7 +87,7 @@ class FeedTestCase(BaseTestCase):
 		self.assertTrue('protocol="5"' in rss)
 		self.assertTrue('</cloud>' in rss)
 
-	def test_feed_image_element(self):
+	def test_image_element(self):
 		rss = Feed('', '', '', image = Image('1', '2', '3', 4, 5, '6')).rss()
 		self.assertTrue('<image>' in rss)
 		self.assertTrue(self._element('url', '1') in rss)
@@ -90,7 +98,7 @@ class FeedTestCase(BaseTestCase):
 		self.assertTrue(self._element('description', '6') in rss)
 		self.assertTrue('</image>' in rss)
 
-	def test_feed_textInput_element(self):
+	def test_textinput_element(self):
 		rss = Feed('', '', '', textInput = TextInput('1', '2', '3', '4')).rss()
 		self.assertTrue('<textInput>' in rss)
 		self.assertTrue(self._element('title', '1') in rss)
@@ -99,7 +107,7 @@ class FeedTestCase(BaseTestCase):
 		self.assertTrue(self._element('link', '4') in rss)
 		self.assertTrue('</textInput>' in rss)
 
-	def test_feed_skipHours_element(self):
+	def test_skiphours_element(self):
 		rss = Feed('', '', '', skipHours = SkipHours([0, 2, 4, 6, 8, 10])).rss()
 		self.assertTrue('<skipHours>' in rss)
 		self.assertTrue(self._element('hour', '0') in rss)
@@ -110,7 +118,7 @@ class FeedTestCase(BaseTestCase):
 		self.assertTrue(self._element('hour', '10') in rss)
 		self.assertTrue('</skipHours>' in rss)
 
-	def test_feed_skipDays_element(self):
+	def test_skipdays_element(self):
 		rss = Feed('', '', '', skipDays = SkipDays(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Friday'])).rss()
 		self.assertTrue('<skipDays>' in rss)
 		self.assertTrue(self._element('day', 'Monday') in rss)
@@ -122,23 +130,23 @@ class FeedTestCase(BaseTestCase):
 		self.assertTrue(self._element('day', 'Friday') in rss)
 		self.assertTrue('</skipDays>' in rss)
 
-	def test_feed_categories_as_single_category_element(self):
+	def test_categories_as_single_category_element(self):
 		rss = Feed('', '', '', categories = Category(category = '123', domain = '234')).rss()
 		self.assertTrue('<category' in rss)
 		self.assertTrue('domain="234"' in rss)
 		self.assertTrue('>123</category>' in rss)
 
-	def test_feed_categories_as_single_string_element(self):
+	def test_categories_as_single_string_element(self):
 		rss = Feed('', '', '', categories = '123').rss()
 		self.assertTrue(self._element('category', '123') in rss)
 
-	def test_feed_categories_as_category_array_element(self):
+	def test_categories_as_category_array_element(self):
 		rss = Feed('', '', '', categories = [Category('123'), Category('234'), Category('345')]).rss()
 		self.assertTrue(self._element('category', '123') in rss)
 		self.assertTrue(self._element('category', '234') in rss)
 		self.assertTrue(self._element('category', '345') in rss)
 
-	def test_feed_categories_as_string_array_element(self):
+	def test_categories_as_string_array_element(self):
 		rss = Feed('', '', '', categories = ['123', '234', '345']).rss()
 		self.assertTrue(self._element('category', '123') in rss)
 		self.assertTrue(self._element('category', '234') in rss)
@@ -157,7 +165,7 @@ class FeedTestCase(BaseTestCase):
 			Image(url = '', title = '', link = None)
 		self.assertTrue('link' in str(cm.exception))
 
-	def test_textInput_required_elements_validation(self):
+	def test_textinput_required_elements_validation(self):
 		with self.assertRaises(ElementRequiredError) as cm:
 			TextInput(title = None, description = '', name = '', link = '')
 		self.assertTrue('title' in str(cm.exception))
@@ -174,12 +182,12 @@ class FeedTestCase(BaseTestCase):
 			TextInput(title = '', description = '', name = '', link = None)
 		self.assertTrue('link' in str(cm.exception))
 
-	def test_skipHours_required_elements_validation(self):
+	def test_skiphours_required_elements_validation(self):
 		with self.assertRaises(ElementRequiredError) as cm:
 			SkipHours(hours = None)
 		self.assertTrue('hours' in str(cm.exception))
 
-	def test_skipDays_required_elements_validation(self):
+	def test_skipdays_required_elements_validation(self):
 		with self.assertRaises(ElementRequiredError) as cm:
 			SkipDays(days = None)
 		self.assertTrue('days' in str(cm.exception))
@@ -225,6 +233,62 @@ class FeedTestCase(BaseTestCase):
 
 class ItemTestCase(BaseTestCase):
 
+	def test_required_elements_validation(self):
+		with self.assertRaises(ElementRequiredError) as cm:
+			Item()
+		self.assertTrue('title' in str(cm.exception))
+		self.assertTrue('description' in str(cm.exception))
+
+	def test_optional_elements(self):
+		self.assertTrue(self._element('title', '123') in Feed('', '', '', items = [Item(title='123')]).rss())
+		self.assertTrue(self._element('link', '123') in Feed('', '', '', items = [Item(title = '', link='123')]).rss())
+		self.assertTrue(self._element('description', '123') in Feed('', '', '', items = [Item(description='123')]).rss())
+		self.assertTrue(self._element('author', '123') in Feed('', '', '', items = [Item(title = '', author='123')]).rss())
+		self.assertTrue(self._element('comments', '123') in Feed('', '', '', items = [Item(title = '', comments='123')]).rss())
+		self.assertTrue(self._element('pubDate', 'Thu, 13 Nov 2014 08:00:00 GMT') in Feed('', '', '', items = [Item(title = '', pubDate = datetime.datetime(2014, 11, 13, 8, 0, 0))]).rss())
+
+	def test_categories_as_single_category_element(self):
+		rss = Feed('', '', '', items = [Item(title='abc', categories = Category('123', domain = '234'))]).rss()
+		self.assertTrue('<category' in rss)
+		self.assertTrue('domain="234"' in rss)
+		self.assertTrue('>123</category>' in rss)
+
+	def test_categories_as_single_string_element(self):
+		rss = Feed('', '', '', items = [Item(title='abc', categories = '123')]).rss()
+		self.assertTrue(self._element('category', '123') in rss)
+
+	def test_categories_as_category_array_element(self):
+		rss = Feed('', '', '', items = [Item(title='abc', categories = [Category('123'), Category('234'), Category('345')])]).rss()
+		self.assertTrue(self._element('category', '123') in rss)
+		self.assertTrue(self._element('category', '234') in rss)
+		self.assertTrue(self._element('category', '345') in rss)
+
+	def test_categories_as_string_array_element(self):
+		rss = Feed('', '', '', items = [Item(title='abc', categories = ['123', '234', '345'])]).rss()
+		self.assertTrue(self._element('category', '123') in rss)
+		self.assertTrue(self._element('category', '234') in rss)
+		self.assertTrue(self._element('category', '345') in rss)
+
+	def test_enclosure_element(self):
+		rss = Feed('', '', '', items = [Item(title = '', enclosure = Enclosure(url = '123', length = 234, type = '345'))]).rss()
+		self.assertTrue('<enclosure ' in rss)
+		self.assertTrue('url="123"' in rss)
+		self.assertTrue('length="234"' in rss)
+		self.assertTrue('type="345"' in rss)
+		self.assertTrue('</enclosure>' in rss)
+
+	def test_guid_element(self):
+		rss = Feed('', '', '', items = [Item(title = '', guid = Guid(guid = '123', isPermaLink = False))]).rss()
+		self.assertTrue('<guid ' in rss)
+		self.assertTrue('isPermaLink="false"' in rss)
+		self.assertTrue('123</guid>' in rss)
+
+	def test_source_element(self):
+		rss = Feed('', '', '', items = [Item(title = '', source = Source(name = '123', url = '234'))]).rss()
+		self.assertTrue('<source ' in rss)
+		self.assertTrue('url="234"' in rss)
+		self.assertTrue('123</source>' in rss)
+
 	def test_guid_required_elements_validation(self):
 		with self.assertRaises(ElementRequiredError) as cm:
 			Guid(guid = None)
@@ -246,62 +310,6 @@ class ItemTestCase(BaseTestCase):
 	def test_guid_ispermalink_should_be_true_if_none_is_provided(self):
 		guid = Guid(guid = '123', isPermaLink = None)
 		self.assertTrue(guid.isPermaLink)
-
-	def test_item_required_elements_validation(self):
-		with self.assertRaises(ElementRequiredError) as cm:
-			Item()
-		self.assertTrue('title' in str(cm.exception))
-		self.assertTrue('description' in str(cm.exception))
-
-	def test_item_optional_elements(self):
-		self.assertTrue(self._element('title', '123') in Feed('', '', '', items = [Item(title='123')]).rss())
-		self.assertTrue(self._element('link', '123') in Feed('', '', '', items = [Item(title = '', link='123')]).rss())
-		self.assertTrue(self._element('description', '123') in Feed('', '', '', items = [Item(description='123')]).rss())
-		self.assertTrue(self._element('author', '123') in Feed('', '', '', items = [Item(title = '', author='123')]).rss())
-		self.assertTrue(self._element('comments', '123') in Feed('', '', '', items = [Item(title = '', comments='123')]).rss())
-		self.assertTrue(self._element('pubDate', 'Thu, 13 Nov 2014 08:00:00 GMT') in Feed('', '', '', items = [Item(title = '', pubDate = datetime.datetime(2014, 11, 13, 8, 0, 0))]).rss())
-
-	def test_item_categories_as_single_category_element(self):
-		rss = Feed('', '', '', items = [Item(title='abc', categories = Category('123', domain = '234'))]).rss()
-		self.assertTrue('<category' in rss)
-		self.assertTrue('domain="234"' in rss)
-		self.assertTrue('>123</category>' in rss)
-
-	def test_item_categories_as_single_string_element(self):
-		rss = Feed('', '', '', items = [Item(title='abc', categories = '123')]).rss()
-		self.assertTrue(self._element('category', '123') in rss)
-
-	def test_item_categories_as_category_array_element(self):
-		rss = Feed('', '', '', items = [Item(title='abc', categories = [Category('123'), Category('234'), Category('345')])]).rss()
-		self.assertTrue(self._element('category', '123') in rss)
-		self.assertTrue(self._element('category', '234') in rss)
-		self.assertTrue(self._element('category', '345') in rss)
-
-	def test_item_categories_as_string_array_element(self):
-		rss = Feed('', '', '', items = [Item(title='abc', categories = ['123', '234', '345'])]).rss()
-		self.assertTrue(self._element('category', '123') in rss)
-		self.assertTrue(self._element('category', '234') in rss)
-		self.assertTrue(self._element('category', '345') in rss)
-
-	def test_item_enclosure_element(self):
-		rss = Feed('', '', '', items = [Item(title = '', enclosure = Enclosure(url = '123', length = 234, type = '345'))]).rss()
-		self.assertTrue('<enclosure ' in rss)
-		self.assertTrue('url="123"' in rss)
-		self.assertTrue('length="234"' in rss)
-		self.assertTrue('type="345"' in rss)
-		self.assertTrue('</enclosure>' in rss)
-
-	def test_item_guid_element(self):
-		rss = Feed('', '', '', items = [Item(title = '', guid = Guid(guid = '123', isPermaLink = False))]).rss()
-		self.assertTrue('<guid ' in rss)
-		self.assertTrue('isPermaLink="false"' in rss)
-		self.assertTrue('123</guid>' in rss)
-
-	def test_item_source_element(self):
-		rss = Feed('', '', '', items = [Item(title = '', source = Source(name = '123', url = '234'))]).rss()
-		self.assertTrue('<source ' in rss)
-		self.assertTrue('url="234"' in rss)
-		self.assertTrue('123</source>' in rss)
 
 if __name__ == '__main__':
     unittest.main()
