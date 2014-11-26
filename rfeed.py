@@ -449,6 +449,9 @@ class Feed(Serializable):
 	def _publish(self, handler):
 		Serializable._publish(self, handler)
 
+		handler.startElement("rss", {"version": "2.0"})
+		handler.startElement("channel", {})
+
 		self._write_element("title", self.title)
 		self._write_element("link", self.link)
 		self._write_element("description", self.description)
@@ -485,6 +488,9 @@ class Feed(Serializable):
 
 		for item in self.items:
 			item._publish(self.handler)
+
+		handler.endElement("channel")
+		handler.endElement("rss")
 
 class ElementRequiredError(Exception):
     def __init__(self, element1, element2 = None):

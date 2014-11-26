@@ -13,7 +13,22 @@ class SerializableTestCase(unittest.TestCase):
 	def test_date_returns_none_if_date_is_none(self):
 		self.assertIsNone(Serializable().date(None))
 
-class FeedTestCase(unittest.TestCase):
+class BaseTestCase(unittest.TestCase):
+
+	def _element(self, element, value, attributes = {}):
+		return '<' + element + '>' + value + '</' + element + '>'
+
+class FeedTestCase(BaseTestCase):
+
+	def test_feed_rss_element(self):
+		rss = Feed('', '', '').rss()
+		self.assertTrue('<rss version="2.0">' in rss)		
+		self.assertTrue('</rss>' in rss)
+
+	def test_feed_channel_element(self):
+		rss = Feed('', '', '').rss()
+		self.assertTrue('<channel>' in rss)
+		self.assertTrue('</channel>' in rss)
 
 	def test_feed_required_elements(self):
 		self.assertTrue(self._element('title', 'This is a sample title') in Feed('This is a sample title', '', '').rss())
@@ -208,12 +223,14 @@ class FeedTestCase(unittest.TestCase):
 			Category(category = None)
 		self.assertTrue('category' in str(cm.exception))
 
+class ItemTestCase(BaseTestCase):
+
 	def test_guid_required_elements_validation(self):
 		with self.assertRaises(ElementRequiredError) as cm:
 			Guid(guid = None)
 		self.assertTrue('guid' in str(cm.exception))
 
-	def test_sopurce_required_elements_validation(self):
+	def test_source_required_elements_validation(self):
 		with self.assertRaises(ElementRequiredError) as cm:
 			Source(name = None, url = '123')
 		self.assertTrue('name' in str(cm.exception))
@@ -285,9 +302,6 @@ class FeedTestCase(unittest.TestCase):
 		self.assertTrue('<source ' in rss)
 		self.assertTrue('url="234"' in rss)
 		self.assertTrue('123</source>' in rss)
-
-	def _element(self, element, value, attributes = {}):
-		return '<' + element + '>' + value + '</' + element + '>'
 
 if __name__ == '__main__':
     unittest.main()
