@@ -213,6 +213,15 @@ class FeedTestCase(unittest.TestCase):
 			Guid(guid = None)
 		self.assertTrue('guid' in str(cm.exception))
 
+	def test_sopurce_required_elements_validation(self):
+		with self.assertRaises(ElementRequiredError) as cm:
+			Source(name = None, url = '123')
+		self.assertTrue('name' in str(cm.exception))
+
+		with self.assertRaises(ElementRequiredError) as cm:
+			Source(name = '123', url = None)
+		self.assertTrue('url' in str(cm.exception))
+
 	def test_guid_ispermalink_should_be_true_by_default(self):
 		guid = Guid(guid = '123')
 		self.assertTrue(guid.isPermaLink)
@@ -270,6 +279,12 @@ class FeedTestCase(unittest.TestCase):
 		self.assertTrue('<guid ' in rss)
 		self.assertTrue('isPermaLink="false"' in rss)
 		self.assertTrue('123</guid>' in rss)
+
+	def test_item_source_element(self):
+		rss = Feed('', '', '', items = [Item(title = '', source = Source(name = '123', url = '234'))]).rss()
+		self.assertTrue('<source ' in rss)
+		self.assertTrue('url="234"' in rss)
+		self.assertTrue('123</source>' in rss)
 
 	def _element(self, element, value, attributes = {}):
 		return '<' + element + '>' + value + '</' + element + '>'

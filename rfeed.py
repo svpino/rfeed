@@ -272,6 +272,28 @@ class Guid(Serializable):
 
 		self._write_element("guid", self.guid, { "isPermaLink": "true" if self.isPermaLink else "false" })
 
+class Source(Serializable):
+	""" A Source object represents the RSS channel that the item came from.
+	More information at http://cyber.law.harvard.edu/rss/rss.html#ltsourcegtSubelementOfLtitemgt
+	"""
+	def __init__(self, name, url):
+		""" Keyword arguments:
+		name -- The name of the RSS channel that the item came from.
+		url -- Links to the XMLization of the source.
+		"""
+		Serializable.__init__(self)
+
+		if name is None: raise ElementRequiredError("name")
+		if url is None: raise ElementRequiredError("url")
+
+		self.name = name
+		self.url = url
+
+	def _publish(self, handler):
+		Serializable._publish(self, handler)
+
+		self._write_element("source", self.name, { "url": self.url })
+
 class iTunes(Serializable):
 	def __init__(self, author, block, category, image, explicit, complete, new_feed_url, owner, subtitle, summary):
 		Serializable.__init__(self)
@@ -352,8 +374,10 @@ class Item(Serializable):
 		if self.guid is not None:
 			self.guid._publish(self.handler)
 
-		self.handler.endElement("item")
+		if self.source is not None:
+			self.source._publish(self.handler)
 
+		self.handler.endElement("item")
 
 class Feed(Serializable):
 	def __init__(self, title, link, description, language = None, copyright = None, managingEditor = None, webMaster = None, pubDate = None, lastBuildDate = None, categories = None, 
