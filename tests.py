@@ -233,16 +233,10 @@ class FeedTestCase(BaseTestCase):
 			feed.add_extension(Fake())
 
 	def test_get_attributes_should_include_namespaces(self):
-		feed = Feed('', '', '')
-		feed.add_extension(MockExtension1())
-		rss = feed.rss()
-		self.assertTrue('name="value"' in rss)
+		self.assertTrue('name="value"' in Feed('', '', '', extensions = [MockExtension1()]).rss())
 
 	def test_get_attributes_should_work_fine_with_no_namespaces(self):
-		feed = Feed('', '', '')
-		feed.add_extension(MockExtension2())
-		rss = feed.rss()
-		self.assertTrue('version="2.0"' in rss)
+		self.assertTrue('version="2.0"' in Feed('', '', '', extensions = [MockExtension2()]).rss())
 
 class ItemTestCase(BaseTestCase):
 
@@ -325,8 +319,21 @@ class ItemTestCase(BaseTestCase):
 		self.assertTrue(guid.isPermaLink)
 
 class iTunesTestCase(BaseTestCase):
-	def test_sample(self):
-		pass
+
+	def test_namespace_is_added_to_the_feed(self):
+		self.assertTrue('xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"' in Feed('', '', '', extensions = [iTunes()]).rss())
+
+	def test_optional_elements(self):
+		self.assertTrue(self._element('itunes:author', 'svpino') in Feed('', '', '', extensions = [iTunes(author = 'svpino')]).rss())
+
+	def test_block_can_be_specified_as_boolean(self):
+		self.assertTrue(self._element('itunes:block', 'yes') in Feed('', '', '', extensions = [iTunes(block = True)]).rss())
+		self.assertTrue(self._element('itunes:block', 'no') in Feed('', '', '', extensions = [iTunes(block = False)]).rss())
+
+	def test_block_can_be_specified_as_string(self):
+		self.assertTrue(self._element('itunes:block', 'yes') in Feed('', '', '', extensions = [iTunes(block = 'yes')]).rss())
+		self.assertTrue(self._element('itunes:block', 'yes') in Feed('', '', '', extensions = [iTunes(block = 'YES')]).rss())
+		self.assertTrue(self._element('itunes:block', 'no') in Feed('', '', '', extensions = [iTunes(block = 'xyz')]).rss())
 
 class MockExtension1(Extension):
 	def __init__(self):

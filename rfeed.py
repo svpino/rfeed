@@ -314,11 +314,12 @@ class Source(Serializable):
 		self._write_element("source", self.name, { "url": self.url })
 
 class iTunes(Extension):
-	def __init__(self, author, block, category, image, explicit, complete, owner, subtitle, summary, new_feed_url):
+	def __init__(self, author = None, block = None, category = None, image = None, explicit = None, complete = None, owner = None, subtitle = None, 
+		summary = None, new_feed_url = None):
 		Extension.__init__(self)
 
 		self.author = author
-		self.block = block
+		self.block = True if (isinstance(block, basestring) and block.lower() == 'yes') else block
 		self.category = category
 		self.image = image
 		self.explicit = explicit
@@ -334,13 +335,18 @@ class iTunes(Extension):
 	def publish(self, handler):
 		Extension.publish(self, handler)
 
+		self._write_element("itunes:author", self.author)
+		self._write_element("itunes:block", "yes" if self.block is True else "no")
+
+
 class Item(Serializable):
 	""" An Item object may represent a "story" - much like a story in a newspaper or magazine; if so its description is a synopsis of the story, and the link points to the full story. 
 	An item may also be complete in itself, if so, the description contains the text, and the link and title may be omitted. All elements of an item are optional, however at least one 
 	of title or description must be present.
 	More information at http://cyber.law.harvard.edu/rss/rss.html#hrelementsOfLtitemgt
 	"""
-	def __init__(self, title = None, link = None, description = None, author = None, categories = None, comments = None, enclosure = None, guid = None, pubDate = None, source = None):
+	def __init__(self, title = None, link = None, description = None, author = None, categories = None, comments = None, enclosure = None, 
+		guid = None, pubDate = None, source = None):
 		""" Keyword arguments:
 		title -- Optional. The title of the item.
 		link  -- Optional. The URL of the item.
@@ -405,8 +411,9 @@ class Item(Serializable):
 		self.handler.endElement("item")
 
 class Feed(Serializable):
-	def __init__(self, title, link, description, language = None, copyright = None, managingEditor = None, webMaster = None, pubDate = None, lastBuildDate = None, categories = None, 
-		generator = None, docs = None, cloud = None, ttl = None, image = None, rating = None, textInput = None, skipHours = None, skipDays = None, items = None):
+	def __init__(self, title, link, description, language = None, copyright = None, managingEditor = None, webMaster = None, pubDate = None, 
+		lastBuildDate = None, categories = None, generator = None, docs = None, cloud = None, ttl = None, image = None, rating = None, 
+		textInput = None, skipHours = None, skipDays = None, items = None, extensions = None):
 		""" Keyword arguments:
 		title -- The name of the channel.
 		link -- The URL to the HTML website corresponding to the channel.
@@ -427,11 +434,11 @@ class Feed(Serializable):
 		textInput -- Optional. Specifies a text input box that can be displayed with the channel.
 		skipHours -- Optional. A hint for aggregators telling them which hours they can skip.
 		skipDays -- Optional. A hint for aggregators telling them which days they can skip.
+		items -- Optional. The list of items included in this channel.
+		extensions -- Optional. The list of extensions added to the feed.
 		"""
 
 		Serializable.__init__(self)
-
-		self.extensions = []
 
 		if title is None: raise ElementRequiredError("title")
 		if link is None: raise ElementRequiredError("link")
@@ -464,10 +471,11 @@ class Feed(Serializable):
 			self.categories = [Category(self.categories)]
 
 		self.items = [] if items is None else items
+		self.extensions = [] if extensions is None else extensions
 
 	def add_extension(self, extension):
-		""" This is the method to add a new extension to the RSS feed. For example, iTunes is an extension and can be added using this method.
-		You can also create new extensions and add them to the feed. Just make sure you inherit from the Extension class.
+		""" This is the method to add a new extension to the feed.
+		To create new extensions, make sure you inherit from the Extension class.
 		"""
 		if not isinstance(extension, Extension):
 			raise TypeError("The provided extension should be a subclass of the Extension class")
@@ -524,6 +532,9 @@ class Feed(Serializable):
 
 		for item in self.items:
 			item.publish(self.handler)
+
+		for extension in self.extensions:
+			extension.publish(self.handler)
 
 		handler.endElement("channel")
 		handler.endElement("rss")
