@@ -338,6 +338,12 @@ class iTunes(Extension):
 		self._write_element("itunes:author", self.author)
 		self._write_element("itunes:block", "yes" if self.block is True else "no")
 
+		if self.image is not None:
+			self._write_element("itunes:image", None, {"href" : self.image })
+			
+		self._write_element("itunes:subtitle", self.subtitle)
+		self._write_element("itunes:summary", self.summary)
+
 
 class Item(Serializable):
 	""" An Item object may represent a "story" - much like a story in a newspaper or magazine; if so its description is a synopsis of the story, and the link points to the full story. 
