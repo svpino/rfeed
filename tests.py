@@ -340,6 +340,28 @@ class iTunesTestCase(BaseTestCase):
 	def test_image_element(self):
 		self.assertTrue('<itunes:image href="123"></itunes:image>' in Feed('', '', '', extensions = [iTunes(image = '123')]).rss())
 
+	def test_complete_can_be_specified_as_boolean(self):
+		self.assertTrue(self._element('itunes:complete', 'yes') in Feed('', '', '', extensions = [iTunes(complete = True)]).rss())
+		self.assertTrue(self._element('itunes:complete', 'no') in Feed('', '', '', extensions = [iTunes(complete = False)]).rss())
+
+	def test_complete_can_be_specified_as_string(self):
+		self.assertTrue(self._element('itunes:complete', 'yes') in Feed('', '', '', extensions = [iTunes(complete = 'yes')]).rss())
+		self.assertTrue(self._element('itunes:complete', 'yes') in Feed('', '', '', extensions = [iTunes(complete = 'YES')]).rss())
+		self.assertTrue(self._element('itunes:complete', 'no') in Feed('', '', '', extensions = [iTunes(complete = 'xyz')]).rss())
+
+	def test_explicit_can_be_specified_as_boolean(self):
+		self.assertTrue(self._element('itunes:explicit', 'yes') in Feed('', '', '', extensions = [iTunes(explicit = True)]).rss())
+		self.assertTrue(self._element('itunes:explicit', 'clean') in Feed('', '', '', extensions = [iTunes(explicit = False)]).rss())
+
+	def test_explicit_can_be_specified_as_string(self):
+		self.assertTrue(self._element('itunes:explicit', 'yes') in Feed('', '', '', extensions = [iTunes(explicit = 'yes')]).rss())
+		self.assertTrue(self._element('itunes:explicit', 'yes') in Feed('', '', '', extensions = [iTunes(explicit = 'YES')]).rss())
+		self.assertTrue(self._element('itunes:explicit', 'clean') in Feed('', '', '', extensions = [iTunes(explicit = 'xyz')]).rss())
+
+	def test_explicit_should_not_be_included_if_not_specified(self):
+		self.assertFalse(self._element('itunes:explicit', 'yes') in Feed('', '', '', extensions = [iTunes()]).rss())
+		self.assertFalse(self._element('itunes:explicit', 'clean') in Feed('', '', '', extensions = [iTunes()]).rss())
+
 class MockExtension1(Extension):
 	def __init__(self):
 		Extension.__init__(self)

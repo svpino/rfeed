@@ -314,6 +314,9 @@ class Source(Serializable):
 		self._write_element("source", self.name, { "url": self.url })
 
 class iTunes(Extension):
+	""" Extension for iTunes metatags.
+	More information at https://www.apple.com/itunes/podcasts/specs.html
+	"""
 	def __init__(self, author = None, block = None, category = None, image = None, explicit = None, complete = None, owner = None, subtitle = None, 
 		summary = None, new_feed_url = None):
 		Extension.__init__(self)
@@ -322,8 +325,8 @@ class iTunes(Extension):
 		self.block = True if (isinstance(block, basestring) and block.lower() == 'yes') else block
 		self.category = category
 		self.image = image
-		self.explicit = explicit
-		self.complete = complete
+		self.explicit = True if (isinstance(explicit, basestring) and explicit.lower() == 'yes') else explicit
+		self.complete = True if (isinstance(complete, basestring) and complete.lower() == 'yes') else complete
 		self.owner = owner
 		self.subtitle = subtitle
 		self.summary = summary
@@ -340,7 +343,12 @@ class iTunes(Extension):
 
 		if self.image is not None:
 			self._write_element("itunes:image", None, {"href" : self.image })
-			
+
+		if self.explicit is not None:
+			self._write_element("itunes:explicit", "yes" if self.explicit is True else "clean")
+
+		self._write_element("itunes:complete", "yes" if self.complete is True else "no")
+
 		self._write_element("itunes:subtitle", self.subtitle)
 		self._write_element("itunes:summary", self.summary)
 
