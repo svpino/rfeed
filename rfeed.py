@@ -9,30 +9,28 @@ import datetime
 from StringIO import StringIO
 from xml.sax import saxutils
 
-class Extension:
+class Serializable:
+	""" Represents an object that can be serialized as part of the feed.
+	"""
 	def __init__(self):
-		""" Initializes the extension. Make sure you always call the base class method before adding your own code.
+		""" Initializes the extension. In your implementation, make sure you always call this base class method 
+		before adding your own code.
 		"""
 		self.handler = None
 
-	def _publish(self, handler):
-		""" Publishes the specific elements of the extension as XML.
-		This method should be implemented by all the extensions. Also, make sure you always call the base method before 
-		adding your own code.
+	def publish(self, handler):
+		""" This method produces the XML representation of the object to be included in the feed. In your implementation, 
+		make sure you always call this base class method before adding your own code.
+		Keyword arguments:
+		handler -- An xml.sax.saxutils.XMLGenerator instance that you can use to create the XML representation of the object.
 		"""
 		self.handler = handler
 
-	def get_namespace(self):
-		""" Returns the namespace (if any) for this extension. The namespace information is added as an attribute in
-		the <rss> element of the feed. The return value should be a dictionary.
-		For example, here is the code for this method on the iTunes extension: return {"xmlns:itunes": "http://www.itunes.com/dtds/podcast-1.0.dtd"}
-		"""
-		pass
-
-	def date(self, date):
+	def _date(self, date):
 		""" Converts a datetime into an RFC 822 formatted date.
-		This method assumes that the input date is in GMT.
 		Returns None if None is provided as an argument.
+		Keyword arguments:
+		date -- A datetime object in GMT format.
 		"""
 
 		# Alright, I admit it: this method looks hideous. The thing is that RFC 822 requires a specific format for dates, and strftime is 
@@ -58,7 +56,15 @@ class Extension:
 
 			self.handler.endElement(name)
 
-class Category(Extension):
+class Extension(Serializable):
+	def get_namespace(self):
+		""" Returns the namespace (if any) for this extension. The namespace information is added as an attribute in
+		the <rss> element of the feed. The return value should be a dictionary.
+		For example, here is the code for this method on the iTunes extension: return {"xmlns:itunes": "http://www.itunes.com/dtds/podcast-1.0.dtd"}
+		"""
+		pass
+
+class Category(Serializable):
 	""" A Category object specify one or more categories that the channel or item belongs to.
 	More information at http://cyber.law.harvard.edu/rss/rss.html#ltcategorygtSubelementOfLtitemgt
 	"""
@@ -68,19 +74,19 @@ class Category(Extension):
 		domain -- Optional. A string that identifies a categorization taxonomy. 
 		"""
 
-		Extension.__init__(self)
+		Serializable.__init__(self)
 
 		if category is None: raise ElementRequiredError("category")
 
 		self.category = category
 		self.domain = domain
 
-	def _publish(self, handler):
-		Extension._publish(self, handler)
+	def publish(self, handler):
+		Serializable.publish(self, handler)
 		
 		self._write_element("category", self.category, { "domain": self.domain } if self.domain is not None else {})
 
-class Cloud(Extension):
+class Cloud(Serializable):
 	""" A Cloud object specifies a web service that supports the rssCloud interface which can be implemented in HTTP-POST, XML-RPC or SOAP 1.1. 
 	More information at http://cyber.law.harvard.edu/rss/rss.html#ltcloudgtSubelementOfLtchannelgt
 	"""
@@ -93,7 +99,7 @@ class Cloud(Extension):
 		protocol -- Indication of which protocol is to be used.
 		"""
 
-		Extension.__init__(self)
+		Serializable.__init__(self)
 
 		if domain is None: raise ElementRequiredError("domain")
 		if port is None: raise ElementRequiredError("port")
@@ -107,12 +113,12 @@ class Cloud(Extension):
 		self.registerProcedure = registerProcedure
 		self.protocol = protocol
 
-	def _publish(self, handler):
-		Extension._publish(self, handler)		
+	def publish(self, handler):
+		Serializable.publish(self, handler)		
 
 		self._write_element("cloud", None, { "domain": self.domain, "port": str(self.port), "path": self.path, "registerProcedure": self.registerProcedure, "protocol": self.protocol })
 
-class Image(Extension):
+class Image(Serializable):
 	""" An Image object specifies a GIF, JPEG or PNG image that can be displayed with the channel.
 	More information at http://cyber.law.harvard.edu/rss/rss.html#ltimagegtSubelementOfLtchannelgt
 	"""
@@ -126,7 +132,7 @@ class Image(Extension):
     	description -- Optional. Contains text that is included in the TITLE attribute of the link formed around the image in the HTML rendering.
 		"""
 
-		Extension.__init__(self)
+		Serializable.__init__(self)
 
 		if url is None: raise ElementRequiredError("url")
 		if title is None: raise ElementRequiredError("title")
@@ -139,8 +145,8 @@ class Image(Extension):
 		self.height = height
 		self.description = description
         
-	def _publish(self, handler):
-		Extension._publish(self, handler)
+	def publish(self, handler):
+		Serializable.publish(self, handler)
 		self.handler.startElement("image", {})
 
 		self._write_element("url", self.url)
@@ -152,7 +158,7 @@ class Image(Extension):
 
 		self.handler.endElement("image")
 
-class TextInput(Extension):
+class TextInput(Serializable):
 	""" A TextInput object specifies a text input box that can be displayed with the channel.
 	More information at http://cyber.law.harvard.edu/rss/rss.html#lttextinputgtSubelementOfLtchannelgt
 	"""
@@ -164,7 +170,7 @@ class TextInput(Extension):
 		link -- The URL of the CGI script that processes text input requests. 
 		"""
 
-		Extension.__init__(self)
+		Serializable.__init__(self)
 
 		if title is None: raise ElementRequiredError("title")
 		if description is None: raise ElementRequiredError("description")
@@ -176,8 +182,8 @@ class TextInput(Extension):
 		self.name = name
 		self.link = link
 
-	def _publish(self, handler):
-		Extension._publish(self, handler)
+	def publish(self, handler):
+		Serializable.publish(self, handler)
 		self.handler.startElement("textInput", {})
 
 		self._write_element("title", self.title)
@@ -187,7 +193,7 @@ class TextInput(Extension):
 
 		self.handler.endElement("textInput")
 
-class SkipHours(Extension):
+class SkipHours(Serializable):
 	""" A SkipHours object is a hint for aggregators telling them which hours they can skip.
 	More information at http://cyber.law.harvard.edu/rss/skipHoursDays.html#skiphours
 	"""
@@ -196,14 +202,14 @@ class SkipHours(Extension):
 		hours -- A list containing up to 24 values between 0 and 23, representing a time in GMT.
 		"""
 
-		Extension.__init__(self)
+		Serializable.__init__(self)
 
 		if hours is None: raise ElementRequiredError("hours")
 
 		self.hours = hours
 
-	def _publish(self, handler):
-		Extension._publish(self, handler)
+	def publish(self, handler):
+		Serializable.publish(self, handler)
 
 		if self.hours:
 			self.handler.startElement("skipHours", {})
@@ -213,7 +219,7 @@ class SkipHours(Extension):
 
 			self.handler.endElement("skipHours")
 
-class SkipDays(Extension):
+class SkipDays(Serializable):
 	""" A SkipDays object is a hint for aggregators telling them which days they can skip.
 	More information at http://cyber.law.harvard.edu/rss/skipHoursDays.html#skipdays
 	"""
@@ -222,14 +228,14 @@ class SkipDays(Extension):
 		days -- A list containing up to 7 values. Possible values are Monday, Tuesday, Wednesday, Thursday, Friday, Saturday or Sunday.
 		"""
 
-		Extension.__init__(self)
+		Serializable.__init__(self)
 
 		if days is None: raise ElementRequiredError("days")
 
 		self.days = days
 
-	def _publish(self, handler):
-		Extension._publish(self, handler)
+	def publish(self, handler):
+		Serializable.publish(self, handler)
 
 		if self.days:
 			self.handler.startElement("skipDays", {})
@@ -239,7 +245,7 @@ class SkipDays(Extension):
 
 			self.handler.endElement("skipDays")
 
-class Enclosure(Extension):
+class Enclosure(Serializable):
 	""" An Enclosure object describes a media object that is attached to the item.
 	More information at http://cyber.law.harvard.edu/rss/rss.html#ltenclosuregtSubelementOfLtitemgt
 	"""
@@ -249,7 +255,7 @@ class Enclosure(Extension):
 		length -- Specifies how big the enclosure is in bytes.
 		type -- Specifies the standard MIME type of the enclosure.
 		"""
-		Extension.__init__(self)
+		Serializable.__init__(self)
 
 		if url is None: raise ElementRequiredError("url")
 		if length is None: raise ElementRequiredError("length")
@@ -259,12 +265,12 @@ class Enclosure(Extension):
 		self.length = length
 		self.type = type
 
-	def _publish(self, handler):
-		Extension._publish(self, handler)
+	def publish(self, handler):
+		Serializable.publish(self, handler)
 
 		self._write_element("enclosure", None, { "url": self.url, "length": str(self.length), "type": self.type })
 
-class Guid(Extension):
+class Guid(Serializable):
 	""" A Guid object represents a string that uniquely identifies the item.
 	More information at http://cyber.law.harvard.edu/rss/rss.html#ltguidgtSubelementOfLtitemgt
 	"""
@@ -273,19 +279,19 @@ class Guid(Extension):
 		guid -- This is a string that uniquely identifies the item. When present, an aggregator may choose to use this string to determine if an item is new.
 		isPermaLink -- Indicates whether the guid is a url that points to the item.
 		"""
-		Extension.__init__(self)
+		Serializable.__init__(self)
 
 		if guid is None: raise ElementRequiredError("guid")
 
 		self.guid = guid
 		self.isPermaLink = True if isPermaLink is None else isPermaLink
 
-	def _publish(self, handler):
-		Extension._publish(self, handler)
+	def publish(self, handler):
+		Serializable.publish(self, handler)
 
 		self._write_element("guid", self.guid, { "isPermaLink": "true" if self.isPermaLink else "false" })
 
-class Source(Extension):
+class Source(Serializable):
 	""" A Source object represents the RSS channel that the item came from.
 	More information at http://cyber.law.harvard.edu/rss/rss.html#ltsourcegtSubelementOfLtitemgt
 	"""
@@ -294,7 +300,7 @@ class Source(Extension):
 		name -- The name of the RSS channel that the item came from.
 		url -- Links to the XMLization of the source.
 		"""
-		Extension.__init__(self)
+		Serializable.__init__(self)
 
 		if name is None: raise ElementRequiredError("name")
 		if url is None: raise ElementRequiredError("url")
@@ -302,8 +308,8 @@ class Source(Extension):
 		self.name = name
 		self.url = url
 
-	def _publish(self, handler):
-		Extension._publish(self, handler)
+	def publish(self, handler):
+		Serializable.publish(self, handler)
 
 		self._write_element("source", self.name, { "url": self.url })
 
@@ -325,10 +331,10 @@ class iTunes(Extension):
 	def get_namespace(self):
 		return {"xmlns:itunes": "http://www.itunes.com/dtds/podcast-1.0.dtd"}
 
-	def _publish(self, handler):
-		Extension._publish(self, handler)
+	def publish(self, handler):
+		Extension.publish(self, handler)
 
-class Item(Extension):
+class Item(Serializable):
 	""" An Item object may represent a "story" - much like a story in a newspaper or magazine; if so its description is a synopsis of the story, and the link points to the full story. 
 	An item may also be complete in itself, if so, the description contains the text, and the link and title may be omitted. All elements of an item are optional, however at least one 
 	of title or description must be present.
@@ -348,7 +354,7 @@ class Item(Extension):
 		source -- Optional. The RSS channel that the item came from.
 		"""
 
-		Extension.__init__(self)
+		Serializable.__init__(self)
 
 		if title is None and description is None:
 			raise ElementRequiredError("title", "description")
@@ -370,8 +376,8 @@ class Item(Extension):
 		elif isinstance(self.categories, basestring):
 			self.categories = [Category(self.categories)]
 
-	def _publish(self, handler):
-		Extension._publish(self, handler)
+	def publish(self, handler):
+		Serializable.publish(self, handler)
 
 		self.handler.startElement("item", {})
 
@@ -380,25 +386,25 @@ class Item(Extension):
 		self._write_element("description", self.description)
 		self._write_element("author", self.author)
 		self._write_element("comments", self.comments)
-		self._write_element("pubDate", self.date(self.pubDate))
+		self._write_element("pubDate", self._date(self.pubDate))
 
 		for category in self.categories:
 			if isinstance(category, basestring):
 				category = Category(category)
-			category._publish(self.handler)
+			category.publish(self.handler)
 
 		if self.enclosure is not None:
-			self.enclosure._publish(self.handler)
+			self.enclosure.publish(self.handler)
 
 		if self.guid is not None:
-			self.guid._publish(self.handler)
+			self.guid.publish(self.handler)
 
 		if self.source is not None:
-			self.source._publish(self.handler)
+			self.source.publish(self.handler)
 
 		self.handler.endElement("item")
 
-class Feed(Extension):
+class Feed(Serializable):
 	def __init__(self, title, link, description, language = None, copyright = None, managingEditor = None, webMaster = None, pubDate = None, lastBuildDate = None, categories = None, 
 		generator = None, docs = None, cloud = None, ttl = None, image = None, rating = None, textInput = None, skipHours = None, skipDays = None, items = None):
 		""" Keyword arguments:
@@ -423,7 +429,7 @@ class Feed(Extension):
 		skipDays -- Optional. A hint for aggregators telling them which days they can skip.
 		"""
 
-		Extension.__init__(self)
+		Serializable.__init__(self)
 
 		self.extensions = []
 
@@ -472,12 +478,12 @@ class Feed(Extension):
 		output = StringIO()
 		handler = saxutils.XMLGenerator(output, 'iso-8859-1')
 		handler.startDocument()
-		self._publish(handler)
+		self.publish(handler)
 		handler.endDocument()
 		return output.getvalue()
 
-	def _publish(self, handler):
-		Extension._publish(self, handler)
+	def publish(self, handler):
+		Serializable.publish(self, handler)
 
 		handler.startElement("rss", self._get_attributes())
 		handler.startElement("channel", {})
@@ -489,8 +495,8 @@ class Feed(Extension):
 		self._write_element("copyright", self.copyright)
 		self._write_element("managingEditor", self.managingEditor)
 		self._write_element("webMaster", self.webMaster)
-		self._write_element("pubDate", self.date(self.pubDate))
-		self._write_element("lastBuildDate", self.date(self.lastBuildDate))
+		self._write_element("pubDate", self._date(self.pubDate))
+		self._write_element("lastBuildDate", self._date(self.lastBuildDate))
 		self._write_element("generator", self.generator)
 		self._write_element("docs", self.docs)
 		self._write_element("ttl", self.ttl)
@@ -499,25 +505,25 @@ class Feed(Extension):
 		for category in self.categories:
 			if isinstance(category, basestring):
 				category = Category(category)
-			category._publish(self.handler)
+			category.publish(self.handler)
 
 		if self.cloud is not None:
-			self.cloud._publish(self.handler)
+			self.cloud.publish(self.handler)
 
 		if self.image is not None:
-			self.image._publish(self.handler)
+			self.image.publish(self.handler)
 
 		if self.textInput is not None:
-			self.textInput._publish(self.handler)
+			self.textInput.publish(self.handler)
 
 		if self.skipHours is not None:
-			self.skipHours._publish(self.handler)
+			self.skipHours.publish(self.handler)
 
 		if self.skipDays is not None:
-			self.skipDays._publish(self.handler)	
+			self.skipDays.publish(self.handler)	
 
 		for item in self.items:
-			item._publish(self.handler)
+			item.publish(self.handler)
 
 		handler.endElement("channel")
 		handler.endElement("rss")

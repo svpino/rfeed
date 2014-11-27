@@ -4,19 +4,16 @@ from time import gmtime, strftime
 from datetime import datetime
 from rfeed import *
 
-class ExtensionTestCase(unittest.TestCase):
-
-	def test_date(self):
-		self.assertEquals('Thu, 13 Nov 2014 08:00:00 GMT', Extension().date(datetime.datetime(2014, 11, 13, 8, 0, 0)))
-		self.assertEquals('Mon, 01 Dec 2014 10:22:15 GMT', Extension().date(datetime.datetime(2014, 12, 1, 10, 22, 15)))
-
-	def test_date_returns_none_if_date_is_none(self):
-		self.assertIsNone(Extension().date(None))
-
 class BaseTestCase(unittest.TestCase):
 
 	def _element(self, element, value, attributes = {}):
 		return '<' + element + '>' + value + '</' + element + '>'
+
+class SerializableTestCase(BaseTestCase):
+
+	def test_date(self):
+		self.assertTrue(self._element('pubDate', 'Thu, 13 Nov 2014 08:00:00 GMT') in Feed('', '', '', pubDate = datetime.datetime(2014, 11, 13, 8, 0, 0)).rss())
+		self.assertTrue(self._element('pubDate', 'Mon, 01 Dec 2014 10:22:15 GMT') in Feed('', '', '', pubDate = datetime.datetime(2014, 12, 1, 10, 22, 15)).rss())
 
 class FeedTestCase(BaseTestCase):
 
@@ -227,7 +224,7 @@ class FeedTestCase(BaseTestCase):
 	def test_add_extension(self):
 		feed = Feed('', '', '')
 		self.assertEquals(0, len(feed.extensions))
-		feed.add_extension(Category(''))
+		feed.add_extension(MockExtension1())
 		self.assertEquals(1, len(feed.extensions))
 
 	def test_add_extension_raises_error_if_extension_is_not_serializable(self):
