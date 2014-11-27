@@ -362,6 +362,23 @@ class iTunesTestCase(BaseTestCase):
 		self.assertFalse(self._element('itunes:explicit', 'yes') in Feed('', '', '', extensions = [iTunes()]).rss())
 		self.assertFalse(self._element('itunes:explicit', 'clean') in Feed('', '', '', extensions = [iTunes()]).rss())
 
+	def test_owner_required_elements_validation(self):
+		with self.assertRaises(ElementRequiredError) as cm:
+			Owner(name = None, email = '')
+		self.assertTrue('name' in str(cm.exception))
+
+		with self.assertRaises(ElementRequiredError) as cm:
+			Owner(name = '', email = None)
+		self.assertTrue('email' in str(cm.exception))
+
+	def test_owner_element(self):
+		rss = Feed('', '', '', extensions = [iTunes(owner = Owner('123', '234'))]).rss()
+		self.assertTrue('<itunes:owner>' in rss)
+		self.assertTrue(self._element('itunes:name', '123') in rss)
+		self.assertTrue(self._element('itunes:email', '234') in rss)
+		self.assertTrue('</itunes:owner>' in rss)
+
+
 class MockExtension1(Extension):
 	def __init__(self):
 		Extension.__init__(self)

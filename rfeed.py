@@ -313,6 +313,31 @@ class Source(Serializable):
 
 		self._write_element("source", self.name, { "url": self.url })
 
+class Owner(Serializable):
+	""" An Owner object contains contact information for the owner of the podcast intended to be used for administrative communication.
+	More information at https://www.apple.com/itunes/podcasts/specs.html#owner
+	"""
+	def __init__(self, name, email):
+		""" Keyword arguments
+		name -- The name of the owner.
+		email -- The email address of the owner.
+		"""
+		Serializable.__init__(self)
+
+		if name is None: raise ElementRequiredError("name")
+		if email is None: raise ElementRequiredError("email")
+
+		self.name = name
+		self.email = email
+
+	def publish(self, handler):
+		Serializable.publish(self, handler)		
+
+		self.handler.startElement("itunes:owner", {})
+		self._write_element("itunes:name", self.name)
+		self._write_element("itunes:email", self.email)
+		self.handler.endElement("itunes:owner")
+
 class iTunes(Extension):
 	""" Extension for iTunes metatags.
 	More information at https://www.apple.com/itunes/podcasts/specs.html
@@ -348,6 +373,9 @@ class iTunes(Extension):
 			self._write_element("itunes:explicit", "yes" if self.explicit is True else "clean")
 
 		self._write_element("itunes:complete", "yes" if self.complete is True else "no")
+
+		if self.owner is not None:
+			self.owner.publish(self.handler)
 
 		self._write_element("itunes:subtitle", self.subtitle)
 		self._write_element("itunes:summary", self.summary)
