@@ -93,7 +93,7 @@ class Host(Serializable):
 		self.extensions.append(extension)
 
 class Category(Serializable):
-	""" A Category object specify one or more categories that the channel or item belongs to.
+	""" A Category object specifies one or more categories that the channel or item belongs to.
 	More information at http://cyber.law.harvard.edu/rss/rss.html#ltcategorygtSubelementOfLtitemgt
 	"""
 	def __init__(self, category, domain = None):

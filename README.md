@@ -34,7 +34,7 @@ item1 = Item(
 	description = "This is the description of the first article",
     author = "Santiago L. Valdarrama",
     guid = Guid("http://www.example.com/articles/1"),
-	pubDate = datetime.datetime.now())
+	pubDate = datetime.datetime(2014, 12, 29, 10, 00))
 
 item2 = Item(
 	title = "Second article",
@@ -42,7 +42,7 @@ item2 = Item(
 	description = "This is the description of the second article",
     author = "Santiago L. Valdarrama",
     guid = Guid("http://www.example.com/articles/2"),
-	pubDate = datetime.datetime.now())
+	pubDate = datetime.datetime(2014, 12, 30, 14, 15))
 
 feed = Feed(
 	title = "Sample RSS Feed",
@@ -55,6 +55,34 @@ feed = Feed(
 print feed.rss()	
 
 ```
+
+It's a very succinct example, but it exposes the following concepts:
+
+* The main object of the RSS 2.0 feed is the `Feed` class.
+* The `Feed` class supports a list of `Item` instances.
+* To specify the `guid` attribute of an item, you can use a `Guid` instance.
+* To get the final RSS content, you can use the `rss()` method of the `Feed` class.
+
+Of course, there's way more than what the example above illustrates. Here is the full list of exposed classes and a brief
+description of each one of them:
+
+* `Feed`: This is the main class that represents the RSS 2.0 feed. 
+* `Item`: Represents an item of a feed's channel.
+* `Category`: Represents one or more categories that the channel or item belongs to.
+* `Cloud`: Represents a web service that supports the rssCloud interface which can be implemented in HTTP-POST, XML-RPC or SOAP 1.1. 
+* `Image`: Represents a GIF, JPEG or PNG image that can be displayed with the channel.
+* `TextInput`: Represents a text input box that can be displayed with the channel.
+* `SkipHours`: Represents a hint for aggregators telling them which hours they can skip.
+* `SkipDays`:  Represents a hint for aggregators telling them which days they can skip.
+* `Enclosure`: Represents a media object that is attached to a feed's item.
+* `Guid`: Represents a string that uniquely identifies the item.
+* `Source`: Represents the RSS channel that the item came from.
+
+(For more information about each one of these classes, you can check the official [RSS 2.0 specification](http://cyber.law.harvard.edu/rss/rss.html))
+
+## iTunes Support
+
+## Extending the library
 
 ## Inspiration
 
