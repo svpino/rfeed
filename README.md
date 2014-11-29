@@ -6,8 +6,8 @@ Python RSS 2.0 Generator
 ## Overview
 
 **rfeed** is a library to generate RSS 2.0 feeds in Python. It's based on the work from Andrew Dalke in the 
-[PyRSS2Gen](http://www.dalkescientific.com/Python/PyRSS2Gen.html) library (see the **Inspiration** section below for more
-information.)
+[PyRSS2Gen](http://www.dalkescientific.com/Python/PyRSS2Gen.html) library (see the [Inspiration](https://github.com/svpino/rfeed/blob/master/README.md#inspiration) 
+section below for more information.)
 
 **rfeed** is extensible, and in my opinion very easy to use. Besides the standard RSS 2.0 specification, it also includes
 [iTunes](https://www.apple.com/itunes/podcasts/specs.html) support for podcast feeds.
@@ -21,7 +21,15 @@ following command:
 
 ## Usage
 
+I don't think you are going to find a better reference for using the library than the test suite in `tests.py`. However, tests are
+sometimes hard to understand and isolated, so here is a full example from end to end:
 
+```python
+from rfeed import Feed
+
+feed = Feed()
+
+```
 
 ## Inspiration
 
@@ -36,9 +44,9 @@ much as I could out of it.
 At the end I didn't like what I did to the original library: it was messy all around. It wasn't the library's fault, but my 
 own. I decided to fix the problem from scratch, by rewriting the library in a different way.
 
-I'm not claming this new version is better than the original. It's just different and I think a little bit easier to extend. Since
-I needed iTunes support from the beginning, I also coded an iTunes extension for the library. Now I'm powering my blog and podcast
-with it, and I hope it serves well to anyone with similar needs.
+I'm not claming this new version is better than the original. It's just different and I think a little bit easier to extend and 
+maintain (since it comes with a full suite full of unit tests). Since I needed iTunes support from the beginning, I also coded an 
+iTunes extension for the library. Now I'm powering my blog and podcast with it, and I hope it serves well to anyone with similar needs.
 
 Thanks to Andrew Dalke for writing the first version a long time ago. This project is based on his original work, borrowing ideas
 and code from it.
