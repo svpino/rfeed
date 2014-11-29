@@ -1,8 +1,3 @@
-rfeed
-=====
-
-Python RSS 2.0 Generator
-
 ## Overview
 
 **rfeed** is a library to generate RSS 2.0 feeds in Python. It's based on the work from Andrew Dalke in the 
@@ -22,7 +17,7 @@ following command:
 ## Usage
 
 I don't think you are going to find a better reference for using the library than the test suite in `tests.py`. However, unit tests 
-are sometimes hard to understand and isolated, so here is a full example from end to end:
+are sometimes hard to understand and isolated, so here is a simple example from end to end:
 
 ```python
 import datetime 
@@ -78,11 +73,68 @@ description of each one of them:
 * `Guid`: Represents a string that uniquely identifies the item.
 * `Source`: Represents the RSS channel that the item came from.
 
-(For more information about each one of these classes, you can check the official [RSS 2.0 specification](http://cyber.law.harvard.edu/rss/rss.html))
-
-## iTunes Support
+(For more information about each one of these classes, you can check the official [RSS 2.0 specification](http://cyber.law.harvard.edu/rss/rss.html).)
 
 ## Extending the library
+
+The RSS 2.0 specification is extensible, so it's **rfeed**. Adding extra content to your feed is very simple:
+
+1. Create a class that extends the `Extension` class. 
+2. Overwite the `Extension.get_namespace` method to return the namespace of your extension (the one will be included in the `<rss/>` element of your feed.) 
+If you don't need to add a namespace, you can simply extend the `Serializable` class instead.
+3. Use the `Feed.add_extension()` method, or the `extensions` array in the constructor to provide your extension.
+
+Here is an example of extending your feed with a `content:encoded` element:
+
+```python
+import datetime 
+from rfeed import *
+
+class Content(Extension):
+	def get_namespace(self):
+		return {"xmlns:content": "http://purl.org/rss/1.0/modules/content/"}
+
+class ContentItem(Serializable):
+	def __init__(self, content):
+		Serializable.__init__(self)
+
+		self.content = content
+
+	def publish(self, handler):
+		Serializable.publish(self, handler)
+		self._write_element("content:encoded", self.content)
+
+item = Item(
+	title = "Sample article",
+	link = "http://www.example.com/articles/1", 
+	description = "This is the description of the first article",
+    author = "Santiago L. Valdarrama",
+    guid = Guid("http://www.example.com/articles/1"),
+	pubDate = datetime.datetime(2014, 12, 29, 10, 00),
+	extensions = [ContentItem('This is the value of the enconded content')])
+
+feed = Feed(
+	title = "Sample RSS Feed",
+	link = "http://www.example.com/rss"
+	description = "This is an example of how to use rfeed to generate an RSS 2.0 feed",
+	language = "en-US",
+	lastBuildDate = datetime.datetime.now(),
+	items = [item],
+	extension = [Content()])
+
+print feed.rss()	
+```
+* Note that we want to add our `Content` instance to the list of extensions at the feed level. This way we make sure the namespace
+is included in the feed.
+* In this case the `Content` instance doesn't provide a `publish` method because there's nothing to add to the `<channel/>` element 
+of the feed.
+* The `ContentItem` class extends `Serializable` because it doesn't need to provide a namespace (it was already provided by the `Content`
+instace.)
+* The `ContentItem` instance extends a `publish` method and uses the `_write_element` method to output the specific XML content.
+
+For a more exhaustive example, check the implementation of the iTunes extension in the `rfeed.py` file.
+
+## iTunes Support
 
 ## Inspiration
 
