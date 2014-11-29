@@ -388,16 +388,16 @@ class iTunes(Extension):
 	def __init__(self, author = None, block = None, categories = None, image = None, explicit = None, complete = None, owner = None, subtitle = None, 
 		summary = None, new_feed_url = None):
 		""" Keyword arguments:
-		author --
-		block --
-		categories --
-		image --
-		explicit --
-		complete --
-		owner --
-		subtitle --
-		summary --
-		new_feed_url --
+		author -- The author of the podcast. Visible under podcast title and in iTunes Store Browse.
+		block -- Whether the podcast should appear in the iTunes Store podcast directory.
+		categories -- The browsing categories for this podcast.
+		image -- The URL of the artwork of your podcast.
+		explicit -- Whether your podcast contains explicit material.
+		complete -- Whether your podcast has been completed and no further episodes will be posted in the future.
+		owner -- Contains contact information for the owner of the podcast.
+		subtitle -- A few words that represent the description of the podcast.
+		summary -- An extended summary of the podcast.
+		new_feed_url -- When changing the podcast RSS URL, this is the new URL where the podcast is located.
 		"""
 		Extension.__init__(self)
 
