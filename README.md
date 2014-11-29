@@ -5,10 +5,23 @@ Python RSS 2.0 Generator
 
 ## Overview
 
- 
+**rfeed** is a library to generate RSS 2.0 feeds in Python. It's based on the work from Andrew Dalke in the 
+[PyRSS2Gen](http://www.dalkescientific.com/Python/PyRSS2Gen.html) library (see the **Inspiration** section below for more
+information.)
 
+**rfeed** is extensible, and in my opinion very easy to use. Besides the standard RSS 2.0 specification, it also includes
+[iTunes](https://www.apple.com/itunes/podcasts/specs.html) support for podcast feeds.
 
 ## Installation
+
+The library is a single file `rfeed.py`, so you could simply copy it wherever you need it. You can also install it using the 
+following command:
+	
+	% python setup.py install
+
+## Usage
+
+
 
 ## Inspiration
 
