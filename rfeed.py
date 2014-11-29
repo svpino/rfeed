@@ -6,8 +6,16 @@ _docs = "https://github.com/svpino/rfeed/blob/master/README.md"
 
 import sys
 import datetime
-from StringIO import StringIO
 from xml.sax import saxutils
+
+if sys.version_info[0] == 3:
+	basestring = str
+	from io import StringIO
+else:
+	try:
+		from cStringIO import StringIO
+	except ImportError:
+		from StringIO import StringIO
 
 class Serializable:
 	""" Represents an object that can be serialized as part of the feed.
@@ -27,7 +35,7 @@ class Serializable:
 		self.handler = handler
 
 	def _date(self, date):
-		""" Converts a datetime into an RFC 822 formatted date.
+		""" Converts a datetime into an RFC 2822 formatted date.
 		Returns None if None is provided as an argument.
 		Keyword arguments:
 		date -- A datetime object in GMT format.
@@ -52,7 +60,10 @@ class Serializable:
 			self.handler.startElement(name, attributes)
 
 			if value is not None:
-				self.handler.characters(str(value))
+				if isinstance(value, basestring):
+					self.handler.characters(value)
+				else:
+					self.handler.characters(str(value))
 
 			self.handler.endElement(name)
 

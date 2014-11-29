@@ -454,6 +454,7 @@ class iTunesItemTestCase(BaseTestCase):
 	def test_explicit_can_be_specified_as_string(self):
 		self.assertTrue(self._element('itunes:explicit', 'yes') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(explicit = 'yes')])]).rss())
 		self.assertTrue(self._element('itunes:explicit', 'yes') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(explicit = 'YES')])]).rss())
+		self.assertTrue(self._element('itunes:explicit', 'clean') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(explicit = 'clean')])]).rss())
 		self.assertTrue(self._element('itunes:explicit', 'clean') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(explicit = 'xyz')])]).rss())
 
 	def test_explicit_should_not_be_included_if_not_specified(self):
