@@ -450,16 +450,57 @@ class iTunes(Extension):
 				category = iTunesCategory(category)
 			category.publish(self.handler)
 
-class iTunesItem(Extension):
-	def __init__(self, author = None):
-		Extension.__init__(self)
+class iTunesItem(Serializable):
+	""" Extension for iTunes Item metatags.
+	More information at https://www.apple.com/itunes/podcasts/specs.html
+	"""
+	def __init__(self, author = None, block = None, image = None, duration = None, explicit = None, is_closed_captioned = None, order = None, subtitle = None, summary = None):
+		""" Keyword arguments:
+		author -- The author of the episode.
+		block -- Whether the episode should appear in the iTunes Store podcast directory.
+		image -- The URL of the artwork of your podcast.
+		duration -- Specifies the duration of the podcast episode.
+		explicit -- Whether your episode contains explicit material.
+		is_closed_captioned -- Whether your episode has embedded closed captioning.
+		order -- Used to override the default ordering of episodes in the iTunes Store.
+		subtitle -- A few words that represent the description of the episode.
+		summary -- An extended summary of the episode.
+		"""
+		Serializable.__init__(self)
 
 		self.author = author
+		self.block = True if (isinstance(block, basestring) and block.lower() == 'yes') else block
+		self.image = image
+		self.duration = duration
+		self.explicit = True if (isinstance(explicit, basestring) and explicit.lower() == 'yes') else explicit
+		self.is_closed_captioned = True if (isinstance(is_closed_captioned, basestring) and is_closed_captioned.lower() == 'yes') else is_closed_captioned
+		self.order = order
+		self.subtitle = subtitle
+		self.summary = summary
 
 	def publish(self, handler):
-		Extension.publish(self, handler)
+		Serializable.publish(self, handler)
 
 		self._write_element("itunes:author", self.author)
+
+		if self.block is not None:
+			self._write_element("itunes:block", "yes" if self.block is True else "no")
+
+		if self.image is not None:
+			self._write_element("itunes:image", None, {"href" : self.image })
+
+		self._write_element("itunes:duration", self.duration)
+
+		if self.explicit is not None:
+			self._write_element("itunes:explicit", "yes" if self.explicit is True else "clean")
+
+		if self.is_closed_captioned is not None:
+			self._write_element("itunes:is_closed_captioned", "yes" if self.is_closed_captioned is True else "no")
+
+		self._write_element("itunes:order", str(self.order))
+		self._write_element("itunes:subtitle", self.subtitle)
+		self._write_element("itunes:summary", self.summary)
+
 
 class Item(Host):
 	""" An Item object may represent a "story" - much like a story in a newspaper or magazine; if so its description is a synopsis of the story, and the link points to the full story. 

@@ -426,6 +426,52 @@ class iTunesItemTestCase(BaseTestCase):
 
 	def test_optional_elements(self):
 		self.assertTrue(self._element('itunes:author', 'svpino') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(author = 'svpino')])]).rss())
+		self.assertTrue(self._element('itunes:duration', '10:11:12') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(duration = '10:11:12')])]).rss())
+		self.assertTrue(self._element('itunes:order', '1') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(order = 1)])]).rss())
+		self.assertTrue(self._element('itunes:subtitle', '123') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(subtitle = '123')])]).rss())
+		self.assertTrue(self._element('itunes:summary', '123') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(summary = '123')])]).rss())
+
+	def test_block_can_be_specified_as_boolean(self):
+		self.assertTrue(self._element('itunes:block', 'yes') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(block = True)])]).rss())
+		self.assertTrue(self._element('itunes:block', 'no') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(block = False)])]).rss())
+
+	def test_block_can_be_specified_as_string(self):
+		self.assertTrue(self._element('itunes:block', 'yes') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(block = 'yes')])]).rss())
+		self.assertTrue(self._element('itunes:block', 'yes') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(block = 'YES')])]).rss())
+		self.assertTrue(self._element('itunes:block', 'no') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(block = 'xyz')])]).rss())
+
+	def test_block_should_not_be_included_if_not_specified(self):
+		self.assertFalse(self._element('itunes:block', 'yes') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem()])]).rss())
+		self.assertFalse(self._element('itunes:block', 'no') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem()])]).rss())
+
+	def test_image_element(self):
+		self.assertTrue('<itunes:image href="123"></itunes:image>' in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(image = '123')])]).rss())
+
+	def test_explicit_can_be_specified_as_boolean(self):
+		self.assertTrue(self._element('itunes:explicit', 'yes') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(explicit = True)])]).rss())
+		self.assertTrue(self._element('itunes:explicit', 'clean') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(explicit = False)])]).rss())
+
+	def test_explicit_can_be_specified_as_string(self):
+		self.assertTrue(self._element('itunes:explicit', 'yes') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(explicit = 'yes')])]).rss())
+		self.assertTrue(self._element('itunes:explicit', 'yes') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(explicit = 'YES')])]).rss())
+		self.assertTrue(self._element('itunes:explicit', 'clean') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(explicit = 'xyz')])]).rss())
+
+	def test_explicit_should_not_be_included_if_not_specified(self):
+		self.assertFalse(self._element('itunes:explicit', 'yes') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem()])]).rss())
+		self.assertFalse(self._element('itunes:explicit', 'clean') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem()])]).rss())
+
+	def test_is_closed_captioned_can_be_specified_as_boolean(self):
+		self.assertTrue(self._element('itunes:is_closed_captioned', 'yes') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(is_closed_captioned = True)])]).rss())
+		self.assertTrue(self._element('itunes:is_closed_captioned', 'no') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(is_closed_captioned = False)])]).rss())
+
+	def test_is_closed_captioned_can_be_specified_as_string(self):
+		self.assertTrue(self._element('itunes:is_closed_captioned', 'yes') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(is_closed_captioned = 'yes')])]).rss())
+		self.assertTrue(self._element('itunes:is_closed_captioned', 'yes') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(is_closed_captioned = 'YES')])]).rss())
+		self.assertTrue(self._element('itunes:is_closed_captioned', 'no') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(is_closed_captioned = 'xyz')])]).rss())
+
+	def test_is_closed_captioned_should_not_be_included_if_not_specified(self):
+		self.assertFalse(self._element('itunes:is_closed_captioned', 'yes') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem()])]).rss())
+		self.assertFalse(self._element('itunes:is_closed_captioned', 'no') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem()])]).rss())
 
 class MockExtension1(Extension):
 	def __init__(self):
