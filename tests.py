@@ -15,6 +15,19 @@ class SerializableTestCase(BaseTestCase):
 		self.assertTrue(self._element('pubDate', 'Thu, 13 Nov 2014 08:00:00 GMT') in Feed('', '', '', pubDate = datetime.datetime(2014, 11, 13, 8, 0, 0)).rss())
 		self.assertTrue(self._element('pubDate', 'Mon, 01 Dec 2014 10:22:15 GMT') in Feed('', '', '', pubDate = datetime.datetime(2014, 12, 1, 10, 22, 15)).rss())
 
+class HostTestCase(BaseTestCase):
+
+	def test_add_extension(self):
+		host = Host()
+		self.assertEquals(0, len(host.extensions))
+		host.add_extension(MockExtension1())
+		self.assertEquals(1, len(host.extensions))
+
+	def test_add_extension_raises_error_if_extension_is_not_serializable(self):
+		host = Host()
+		with self.assertRaises(TypeError) as cm:
+			host.add_extension(Fake())
+
 class FeedTestCase(BaseTestCase):
 
 	def test_rss_element(self):
@@ -221,17 +234,6 @@ class FeedTestCase(BaseTestCase):
 			Category(category = None)
 		self.assertTrue('category' in str(cm.exception))
 
-	def test_add_extension(self):
-		feed = Feed('', '', '')
-		self.assertEquals(0, len(feed.extensions))
-		feed.add_extension(MockExtension1())
-		self.assertEquals(1, len(feed.extensions))
-
-	def test_add_extension_raises_error_if_extension_is_not_serializable(self):
-		feed = Feed('', '', '')
-		with self.assertRaises(TypeError) as cm:
-			feed.add_extension(Fake())
-
 	def test_get_attributes_should_include_namespaces(self):
 		self.assertTrue('name="value"' in Feed('', '', '', extensions = [MockExtension1()]).rss())
 
@@ -378,6 +380,10 @@ class iTunesTestCase(BaseTestCase):
 		self.assertTrue(self._element('itunes:email', '234') in rss)
 		self.assertTrue('</itunes:owner>' in rss)
 
+class iTunesItemTestCase(BaseTestCase):
+
+	def test_optional_elements(self):
+		self.assertTrue(self._element('itunes:author', 'svpino') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem(author = 'svpino')])]).rss())
 
 class MockExtension1(Extension):
 	def __init__(self):
@@ -386,15 +392,15 @@ class MockExtension1(Extension):
 	def get_namespace(self):
 		return {"name": "value"}
 
-	def _publish(self, handler):
-		Extension._publish(self, handler)
+	def publish(self, handler):
+		Extension.publish(self, handler)
 
-class MockExtension2(Extension):
+class MockExtension2(Serializable):
 	def __init__(self):
-		Extension.__init__(self)
+		Serializable.__init__(self)
 
-	def _publish(self, handler):
-		Extension._publish(self, handler)
+	def publish(self, handler):
+		Serializable.publish(self, handler)
 
 class Fake:
 	pass
