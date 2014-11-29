@@ -329,6 +329,7 @@ class iTunesTestCase(BaseTestCase):
 		self.assertTrue(self._element('itunes:author', 'svpino') in Feed('', '', '', extensions = [iTunes(author = 'svpino')]).rss())
 		self.assertTrue(self._element('itunes:subtitle', '123') in Feed('', '', '', extensions = [iTunes(subtitle = '123')]).rss())
 		self.assertTrue(self._element('itunes:summary', '123') in Feed('', '', '', extensions = [iTunes(summary = '123')]).rss())
+		self.assertTrue(self._element('itunes:new-feed-url', '123') in Feed('', '', '', extensions = [iTunes(new_feed_url = '123')]).rss())
 
 	def test_block_can_be_specified_as_boolean(self):
 		self.assertTrue(self._element('itunes:block', 'yes') in Feed('', '', '', extensions = [iTunes(block = True)]).rss())

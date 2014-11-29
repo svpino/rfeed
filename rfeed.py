@@ -377,7 +377,6 @@ class iTunes(Extension):
 		#
 		#
 		# FALTAN LAS CATEGORIAS
-		# FALTA EL NEW_FEED_URL
 		#
 		#
 		#
@@ -405,6 +404,7 @@ class iTunes(Extension):
 
 		self._write_element("itunes:subtitle", self.subtitle)
 		self._write_element("itunes:summary", self.summary)
+		self._write_element("itunes:new-feed-url", self.new_feed_url)
 
 class iTunesItem(Extension):
 	def __init__(self, author = None):
