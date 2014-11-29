@@ -330,8 +330,8 @@ class Source(Serializable):
 
 		self._write_element("source", self.name, { "url": self.url })
 
-class Owner(Serializable):
-	""" An Owner object contains contact information for the owner of the podcast intended to be used for administrative communication.
+class iTunesOwner(Serializable):
+	""" An iTunesOwner object contains contact information for the owner of the podcast intended to be used for administrative communication.
 	More information at https://www.apple.com/itunes/podcasts/specs.html#owner
 	"""
 	def __init__(self, name, email):
@@ -355,17 +355,42 @@ class Owner(Serializable):
 		self._write_element("itunes:email", self.email)
 		self.handler.endElement("itunes:owner")
 
+class iTunesCategory(Serializable):
+	""" An iTunesCategory object specified the browsing category of the feed.
+	More information at https://www.apple.com/itunes/podcasts/specs.html#category
+	"""
+	def __init__(self, name, subcategory = None):
+		""" Keyword arguments
+		name -- The name of the category
+		subcategory -- Optional. The name of the subcategory.
+		"""
+		Serializable.__init__(self)
+
+		if name is None: raise ElementRequiredError("name")
+
+		self.name = name
+		self.subcategory = subcategory
+
+	def publish(self, handler):
+		Serializable.publish(self, handler)	
+
+		self.handler.startElement("itunes:category", { "text": self.name })
+
+		if self.subcategory is not None:
+			self._write_element("itunes:category", None, { "text": self.subcategory })
+
+		self.handler.endElement("itunes:category")
+
 class iTunes(Extension):
 	""" Extension for iTunes metatags.
 	More information at https://www.apple.com/itunes/podcasts/specs.html
 	"""
-	def __init__(self, author = None, block = None, category = None, image = None, explicit = None, complete = None, owner = None, subtitle = None, 
+	def __init__(self, author = None, block = None, categories = None, image = None, explicit = None, complete = None, owner = None, subtitle = None, 
 		summary = None, new_feed_url = None):
 		Extension.__init__(self)
 
 		self.author = author
 		self.block = True if (isinstance(block, basestring) and block.lower() == 'yes') else block
-		self.category = category
 		self.image = image
 		self.explicit = True if (isinstance(explicit, basestring) and explicit.lower() == 'yes') else explicit
 		self.complete = True if (isinstance(complete, basestring) and complete.lower() == 'yes') else complete
@@ -374,13 +399,12 @@ class iTunes(Extension):
 		self.summary = summary
 		self.new_feed_url = new_feed_url
 
-		#
-		#
-		# FALTAN LAS CATEGORIAS
-		#
-		#
-		#
+		self.categories = [] if categories is None else categories
 
+		if isinstance(self.categories, iTunesCategory):
+			self.categories = [self.categories]
+		elif isinstance(self.categories, basestring):
+			self.categories = [iTunesCategory(self.categories)]
 
 	def get_namespace(self):
 		return {"xmlns:itunes": "http://www.itunes.com/dtds/podcast-1.0.dtd"}
@@ -405,6 +429,11 @@ class iTunes(Extension):
 		self._write_element("itunes:subtitle", self.subtitle)
 		self._write_element("itunes:summary", self.summary)
 		self._write_element("itunes:new-feed-url", self.new_feed_url)
+
+		for category in self.categories:
+			if isinstance(category, basestring):
+				category = iTunesCategory(category)
+			category.publish(self.handler)
 
 class iTunesItem(Extension):
 	def __init__(self, author = None):

@@ -367,19 +367,44 @@ class iTunesTestCase(BaseTestCase):
 
 	def test_owner_required_elements_validation(self):
 		with self.assertRaises(ElementRequiredError) as cm:
-			Owner(name = None, email = '')
+			iTunesOwner(name = None, email = '')
 		self.assertTrue('name' in str(cm.exception))
 
 		with self.assertRaises(ElementRequiredError) as cm:
-			Owner(name = '', email = None)
+			iTunesOwner(name = '', email = None)
 		self.assertTrue('email' in str(cm.exception))
 
 	def test_owner_element(self):
-		rss = Feed('', '', '', extensions = [iTunes(owner = Owner('123', '234'))]).rss()
+		rss = Feed('', '', '', extensions = [iTunes(owner = iTunesOwner('123', '234'))]).rss()
 		self.assertTrue('<itunes:owner>' in rss)
 		self.assertTrue(self._element('itunes:name', '123') in rss)
 		self.assertTrue(self._element('itunes:email', '234') in rss)
 		self.assertTrue('</itunes:owner>' in rss)
+
+	def test_category_required_elements_validation(self):
+		with self.assertRaises(ElementRequiredError) as cm:
+			iTunesCategory(name = None)
+		self.assertTrue('name' in str(cm.exception))
+
+	def test_categories_as_single_category_element(self):
+		rss = Feed('', '', '', extensions = [iTunes(categories = iTunesCategory('123'))]).rss()
+		self.assertTrue('<itunes:category text="123"></itunes:category>' in rss)
+
+	def test_categories_as_single_string_element(self):
+		rss = Feed('', '', '', extensions = [iTunes(categories = '123')]).rss()
+		self.assertTrue('<itunes:category text="123"></itunes:category>' in rss)
+
+	def test_categories_as_category_array_element(self):
+		rss = Feed('', '', '', extensions = [iTunes(categories = [iTunesCategory('123'), iTunesCategory('234'), iTunesCategory('345')])]).rss()
+		self.assertTrue('<itunes:category text="123"></itunes:category>' in rss)
+		self.assertTrue('<itunes:category text="234"></itunes:category>' in rss)
+		self.assertTrue('<itunes:category text="345"></itunes:category>' in rss)
+
+	def test_categories_as_string_array_element(self):
+		rss = Feed('', '', '', extensions = [iTunes(categories = ['123', '234', '345'])]).rss()
+		self.assertTrue('<itunes:category text="123"></itunes:category>' in rss)
+		self.assertTrue('<itunes:category text="234"></itunes:category>' in rss)
+		self.assertTrue('<itunes:category text="345"></itunes:category>' in rss)
 
 class iTunesItemTestCase(BaseTestCase):
 
