@@ -136,6 +136,51 @@ For a more exhaustive example, check the implementation of the iTunes extension 
 
 ## iTunes Support
 
+Podcasts are a huge medium in 2014, and iTunes is the preferred way of publishing them. This is the reason **rfeed** provides an extension
+for iTunes support. Here is an example of how to use it:
+
+```python
+import datetime 
+from rfeed import *
+
+ itunes_item = iTunesItem(
+    author = "Santiago L. Valdarrama",
+    image = "http://www.example.com/artwork.jpg",
+    duration = "01:11:02",
+    explicit = "clean",
+    subtitle = "The subtitle of the podcast episode",
+    summary = "Here is the summary of this specific episode")
+
+item = Item(
+	title = "Sample article",
+	link = "http://www.example.com/articles/1", 
+	description = "This is the description of the first article",
+    author = "Santiago L. Valdarrama",
+    guid = Guid("http://www.example.com/articles/1"),
+	pubDate = datetime.datetime(2014, 12, 29, 10, 00),
+	extensions = [itunes_item])
+
+itunes = iTunes(
+    author = "Santiago L. Valdarrama",
+    subtitle = "A sample podcast that will never be produced",
+    summary = "This is just a fake description",
+    image = "http://www.example.com/artwork.jpg",
+    explicit = "clean",
+    categories = iTunesCategory(name = 'Technology', subcategory = 'Software How-To'),
+    owner = iTunesOwner(name = 'Santiago L. Valdarrama', email = 'svpino@gmail.com'))
+
+feed = Feed(
+	title = "Sample Podcast RSS Feed",
+	link = "http://www.example.com/rss"
+	description = "This is an example of how to use rfeed to generate an RSS 2.0 feed that supports iTunes metadata",
+	language = "en-US",
+	lastBuildDate = datetime.datetime.now(),
+	items = [item],
+	extension = [itunes])
+
+print feed.rss()	
+```
+
 ## Inspiration
 
 I created my own [blog](https://blog.svpino.com) engine in Python for [Google App Engine](https://cloud.google.com/appengine/), 
