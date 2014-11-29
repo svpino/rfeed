@@ -21,13 +21,38 @@ following command:
 
 ## Usage
 
-I don't think you are going to find a better reference for using the library than the test suite in `tests.py`. However, tests are
-sometimes hard to understand and isolated, so here is a full example from end to end:
+I don't think you are going to find a better reference for using the library than the test suite in `tests.py`. However, unit tests 
+are sometimes hard to understand and isolated, so here is a full example from end to end:
 
 ```python
-from rfeed import Feed
+import datetime 
+from rfeed import *
 
-feed = Feed()
+item1 = Item(
+	title = "First article",
+	link = "http://www.example.com/articles/1", 
+	description = "This is the description of the first article",
+    author = "Santiago L. Valdarrama",
+    guid = Guid("http://www.example.com/articles/1"),
+	pubDate = datetime.datetime.now())
+
+item2 = Item(
+	title = "Second article",
+	link = "http://www.example.com/articles/2", 
+	description = "This is the description of the second article",
+    author = "Santiago L. Valdarrama",
+    guid = Guid("http://www.example.com/articles/2"),
+	pubDate = datetime.datetime.now())
+
+feed = Feed(
+	title = "Sample RSS Feed",
+	link = "http://www.example.com/rss"
+	description = "This is an example of how to use rfeed to generate an RSS 2.0 feed",
+	language = "en-US",
+	lastBuildDate = datetime.datetime.now(),
+	items = [item1, item2])
+
+print feed.rss()	
 
 ```
 
