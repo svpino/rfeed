@@ -387,6 +387,18 @@ class iTunes(Extension):
 	"""
 	def __init__(self, author = None, block = None, categories = None, image = None, explicit = None, complete = None, owner = None, subtitle = None, 
 		summary = None, new_feed_url = None):
+		""" Keyword arguments:
+		author --
+		block --
+		categories --
+		image --
+		explicit --
+		complete --
+		owner --
+		subtitle --
+		summary --
+		new_feed_url --
+		"""
 		Extension.__init__(self)
 
 		self.author = author
@@ -413,7 +425,9 @@ class iTunes(Extension):
 		Extension.publish(self, handler)
 
 		self._write_element("itunes:author", self.author)
-		self._write_element("itunes:block", "yes" if self.block is True else "no")
+
+		if self.block is not None:
+			self._write_element("itunes:block", "yes" if self.block is True else "no")
 
 		if self.image is not None:
 			self._write_element("itunes:image", None, {"href" : self.image })
@@ -421,7 +435,8 @@ class iTunes(Extension):
 		if self.explicit is not None:
 			self._write_element("itunes:explicit", "yes" if self.explicit is True else "clean")
 
-		self._write_element("itunes:complete", "yes" if self.complete is True else "no")
+		if self.complete is not None:
+			self._write_element("itunes:complete", "yes" if self.complete is True else "no")
 
 		if self.owner is not None:
 			self.owner.publish(self.handler)

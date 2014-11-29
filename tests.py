@@ -340,6 +340,10 @@ class iTunesTestCase(BaseTestCase):
 		self.assertTrue(self._element('itunes:block', 'yes') in Feed('', '', '', extensions = [iTunes(block = 'YES')]).rss())
 		self.assertTrue(self._element('itunes:block', 'no') in Feed('', '', '', extensions = [iTunes(block = 'xyz')]).rss())
 
+	def test_block_should_not_be_included_if_not_specified(self):
+		self.assertFalse(self._element('itunes:block', 'yes') in Feed('', '', '', extensions = [iTunes()]).rss())
+		self.assertFalse(self._element('itunes:block', 'no') in Feed('', '', '', extensions = [iTunes()]).rss())
+
 	def test_image_element(self):
 		self.assertTrue('<itunes:image href="123"></itunes:image>' in Feed('', '', '', extensions = [iTunes(image = '123')]).rss())
 
@@ -351,6 +355,10 @@ class iTunesTestCase(BaseTestCase):
 		self.assertTrue(self._element('itunes:complete', 'yes') in Feed('', '', '', extensions = [iTunes(complete = 'yes')]).rss())
 		self.assertTrue(self._element('itunes:complete', 'yes') in Feed('', '', '', extensions = [iTunes(complete = 'YES')]).rss())
 		self.assertTrue(self._element('itunes:complete', 'no') in Feed('', '', '', extensions = [iTunes(complete = 'xyz')]).rss())
+
+	def test_complete_should_not_be_included_if_not_specified(self):
+		self.assertFalse(self._element('itunes:complete', 'yes') in Feed('', '', '', extensions = [iTunes()]).rss())
+		self.assertFalse(self._element('itunes:complete', 'no') in Feed('', '', '', extensions = [iTunes()]).rss())
 
 	def test_explicit_can_be_specified_as_boolean(self):
 		self.assertTrue(self._element('itunes:explicit', 'yes') in Feed('', '', '', extensions = [iTunes(explicit = True)]).rss())
@@ -405,6 +413,14 @@ class iTunesTestCase(BaseTestCase):
 		self.assertTrue('<itunes:category text="123"></itunes:category>' in rss)
 		self.assertTrue('<itunes:category text="234"></itunes:category>' in rss)
 		self.assertTrue('<itunes:category text="345"></itunes:category>' in rss)
+
+	def test_categories_single_category_with_subcategory(self):
+		rss = Feed('', '', '', extensions = [iTunes(categories = iTunesCategory('123', '234'))]).rss()
+		self.assertTrue('<itunes:category text="123"><itunes:category text="234"></itunes:category></itunes:category>' in rss)
+
+	def test_categories_multiple_categories_with_subcategories(self):
+		rss = Feed('', '', '', extensions = [iTunes(categories = [iTunesCategory('123', '234'), iTunesCategory('345', '456')])]).rss()
+		self.assertTrue('<itunes:category text="123"><itunes:category text="234"></itunes:category></itunes:category><itunes:category text="345"><itunes:category text="456"></itunes:category></itunes:category>' in rss)
 
 class iTunesItemTestCase(BaseTestCase):
 
