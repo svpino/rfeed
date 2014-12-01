@@ -73,7 +73,8 @@ description of each one of them:
 * `Guid`: Represents a string that uniquely identifies the item.
 * `Source`: Represents the RSS channel that the item came from.
 
-(For more information about each one of these classes, you can check the official [RSS 2.0 specification](http://cyber.law.harvard.edu/rss/rss.html).)
+(For more information about each one of these classes, you can check the official [RSS 2.0 specification](http://cyber.law.harvard.edu/rss/rss.html), and check 
+out the `rfeed.py` source file.)
 
 ## Extending the library
 
@@ -97,7 +98,6 @@ class Content(Extension):
 class ContentItem(Serializable):
 	def __init__(self, content):
 		Serializable.__init__(self)
-
 		self.content = content
 
 	def publish(self, handler):
@@ -130,7 +130,7 @@ is included in the feed.
 of the feed.
 * The `ContentItem` class extends `Serializable` because it doesn't need to provide a namespace (it was already provided by the `Content`
 instace.)
-* The `ContentItem` instance extends a `publish` method and uses the `_write_element` method to output the specific XML content.
+* The `ContentItem` instance implements the `publish` method and uses the `_write_element` method to output the specific XML content.
 
 For a more exhaustive example, check the implementation of the iTunes extension in the `rfeed.py` file.
 
@@ -203,13 +203,13 @@ and code from it.
 
 ## Contributing
 
-Contributions, questions and comments are all welcome and encouraged.
-
-### Running the unit tests
-
-To run the tests, execute the following command:
+Contributions, questions and comments are all welcome and encouraged. If you run into any problems, please submit an issue and I'll
+take a look. If you want to get your hands dirty and submit a pull request, even better. Also, take a look to the test suite in `tests.py`
+and tests your changes to make sure nothing else breaks. To run the tests, execute the following command:
 
 	$ python tests.py
+
+I really appreciate anything you can contribute to the library. 	
 
 ## License
 
