@@ -194,12 +194,13 @@ much as I could out of it.
 At the end I didn't like what I did to the original library: it was messy all around. It wasn't the library's fault, but my 
 own. I decided to fix the problem from scratch, by rewriting the library in a different way.
 
-I'm not claming this new version is better than the original. It's just different and I think a little bit easier to extend and 
-maintain (since it comes with a full suite full of unit tests). Since I needed iTunes support from the beginning, I also coded an 
-iTunes extension for the library. Now I'm powering my blog and podcast with it, and I hope it serves well to anyone with similar needs.
+I'm not claiming this new version is better than the original. It's just different and I think a little bit easier to extend and 
+maintain (since it comes with a suite full of unit tests). Since I needed iTunes support from the beginning, I also coded an 
+iTunes extension for the library. Now I'm powering my blog and podcast sites with it, and I hope it serves well to anyone with 
+similar needs.
 
-Thanks to Andrew Dalke for writing the first version a long time ago. This project is based on his original work, borrowing ideas
-and code from it.
+Thanks to Andrew Dalke for writing (what I consider) the first version a long time ago. This project is based on his original work, 
+borrowing ideas and code from it, but with enough differences that I felt it deserved a new name.
 
 ## Contributing
 
