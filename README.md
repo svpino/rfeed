@@ -204,7 +204,7 @@ and code from it.
 ## Contributing
 
 Contributions, questions and comments are all welcome and encouraged. If you run into any problems, please submit an issue and I'll
-take a look. If you want to get your hands dirty and submit a pull request, even better. Also, take a look to the test suite in `tests.py`
+take a look. If you want to get your hands dirty and submit a pull request, even better. Also, take a look at the test suite in `tests.py`
 and tests your changes to make sure nothing else breaks. To run the tests, execute the following command:
 
 	$ python tests.py
@@ -213,7 +213,7 @@ I really appreciate anything you can contribute to the library.
 
 ## License
 
-MIT Licence
+[MIT Licence](https://github.com/svpino/rfeed/blob/master/LICENSE)
 
 Copyright (c) 2014 Santiago Valdarrama
 
