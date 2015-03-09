@@ -652,7 +652,7 @@ class Feed(Host):
 
 	def rss(self):
 		output = StringIO()
-		handler = saxutils.XMLGenerator(output, 'iso-8859-1')
+		handler = saxutils.XMLGenerator(output, 'UTF-8')
 		handler.startDocument()
 
 		handler.startElement("rss", self._get_attributes())
