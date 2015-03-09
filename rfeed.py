@@ -341,6 +341,39 @@ class Source(Serializable):
 
 		self._write_element("source", self.name, { "url": self.url })
 
+class PushLink(Serializable):
+    """ A PushLink object specifies a link that allows for PubSubHubbub discovery.
+    More information at http://pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.4.html#discovery
+    or http://documentation.superfeedr.com/publishers.html#discovery
+    """
+    def __init__(self, rel, href, xmlns=None):
+        """ Keyword arguments:
+        rel -- The relation type, generally 'hub' or 'self'.
+        href -- The URL for the relation.
+        xmlns -- The namespace for the link, in this case usually 'http://www.w3.org/2005/Atom'.
+        """
+
+        Serializable.__init__(self)
+
+        if rel is None:
+            raise ElementRequiredError('rel')
+        if href is None:
+            raise ElementRequiredError('href')
+
+        self.rel = rel
+        self.href = href
+        self.xmlns = xmlns
+
+    def publish(self, handler):
+        Serializable.publish(self, handler)
+
+        elements = {"rel": self.rel, "href": self.href}
+        if self.xmlns:
+            elements['xmlns'] = self.xmlns
+
+        self.handler.startElement("link", elements)
+        self.handler.endElement("link")
+
 class iTunesOwner(Serializable):
 	""" An iTunesOwner object contains contact information for the owner of the podcast intended to be used for administrative communication.
 	More information at https://www.apple.com/itunes/podcasts/specs.html#owner
