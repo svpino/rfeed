@@ -5,7 +5,6 @@ _generator = __name__ + " v" + ".".join(map(str, __version__))
 _docs = "https://github.com/svpino/rfeed/blob/master/README.md"
 
 import sys
-import datetime
 from xml.sax import saxutils
 
 if sys.version_info[0] == 3:
@@ -21,13 +20,13 @@ class Serializable:
 	""" Represents an object that can be serialized as part of the feed.
 	"""
 	def __init__(self):
-		""" Initializes the extension. In your implementation, make sure you always call this base class method 
+		""" Initializes the extension. In your implementation, make sure you always call this base class method
 		before adding your own code.
 		"""
 		self.handler = None
 
 	def publish(self, handler):
-		""" This method produces the XML representation of the object to be included in the feed. In your implementation, 
+		""" This method produces the XML representation of the object to be included in the feed. In your implementation,
 		make sure you always call this base class method before adding your own code.
 		Keyword arguments:
 		handler -- An xml.sax.saxutils.XMLGenerator instance that you can use to create the XML representation of the object.
@@ -41,7 +40,7 @@ class Serializable:
 		date -- A datetime object in GMT format.
 		"""
 
-		# Alright, I admit it: this method looks hideous. The thing is that RFC 822 requires a specific format for dates, and strftime is 
+		# Alright, I admit it: this method looks hideous. The thing is that RFC 822 requires a specific format for dates, and strftime is
 		# locale dependent, so I can't use it to create the final date unless I force change the system locale.
 		#
 		# I looked into that (locale.setlocale, then restore), but I got the feeling that I was doing things that I was going to regret later.
@@ -51,9 +50,9 @@ class Serializable:
 
 		if date is None:
 			return None
-		
+
 		return "%s, %02d %s %04d %02d:%02d:%02d GMT" % (["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][date.weekday()], date.day,
-            ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][date.month-1], date.year, date.hour, date.minute, date.second)
+			["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][date.month-1], date.year, date.hour, date.minute, date.second)
 
 	def _write_element(self, name, value, attributes = {}):
 		if value is not None or attributes != {}:
@@ -99,7 +98,7 @@ class Category(Serializable):
 	def __init__(self, category, domain = None):
 		""" Keyword arguments:
 		category --	The name of the category
-		domain -- Optional. A string that identifies a categorization taxonomy. 
+		domain -- Optional. A string that identifies a categorization taxonomy.
 		"""
 
 		Serializable.__init__(self)
@@ -111,16 +110,16 @@ class Category(Serializable):
 
 	def publish(self, handler):
 		Serializable.publish(self, handler)
-		
+
 		self._write_element("category", self.category, { "domain": self.domain } if self.domain is not None else {})
 
 class Cloud(Serializable):
-	""" A Cloud object specifies a web service that supports the rssCloud interface which can be implemented in HTTP-POST, XML-RPC or SOAP 1.1. 
+	""" A Cloud object specifies a web service that supports the rssCloud interface which can be implemented in HTTP-POST, XML-RPC or SOAP 1.1.
 	More information at http://cyber.law.harvard.edu/rss/rss.html#ltcloudgtSubelementOfLtchannelgt
 	"""
 	def __init__(self, domain, port, path, registerProcedure, protocol):
 		""" Keyword arguments:
-		domain -- The domain name or IP address of the cloud. 
+		domain -- The domain name or IP address of the cloud.
 		port --	TCP port that the cloud is running on.
 		path -- The location of its responder.
 		registerProcedure -- The name of the procedure to call to request notification.
@@ -142,7 +141,7 @@ class Cloud(Serializable):
 		self.protocol = protocol
 
 	def publish(self, handler):
-		Serializable.publish(self, handler)		
+		Serializable.publish(self, handler)
 
 		self._write_element("cloud", None, { "domain": self.domain, "port": str(self.port), "path": self.path, "registerProcedure": self.registerProcedure, "protocol": self.protocol })
 
@@ -150,14 +149,14 @@ class Image(Serializable):
 	""" An Image object specifies a GIF, JPEG or PNG image that can be displayed with the channel.
 	More information at http://cyber.law.harvard.edu/rss/rss.html#ltimagegtSubelementOfLtchannelgt
 	"""
-	def __init__(self, url, title, link, width = None, height = None, description = None):	
+	def __init__(self, url, title, link, width = None, height = None, description = None):
 		""" Keyword arguments:
-		url -- The URL of the image that represents the channel. 
-    	title -- Describes the image. It's used in the ALT attribute of the HTML <img> tag when the channel is rendered in HTML. 
-    	link -- The URL of the site. When the channel is rendered the image is a link to the site.
-    	width -- Optional. The width of the image in pixels.
-    	height -- Optional. The height of the image in pixels.
-    	description -- Optional. Contains text that is included in the TITLE attribute of the link formed around the image in the HTML rendering.
+		url -- The URL of the image that represents the channel.
+		title -- Describes the image. It's used in the ALT attribute of the HTML <img> tag when the channel is rendered in HTML.
+		link -- The URL of the site. When the channel is rendered the image is a link to the site.
+		width -- Optional. The width of the image in pixels.
+		height -- Optional. The height of the image in pixels.
+		description -- Optional. Contains text that is included in the TITLE attribute of the link formed around the image in the HTML rendering.
 		"""
 
 		Serializable.__init__(self)
@@ -172,7 +171,7 @@ class Image(Serializable):
 		self.width = width
 		self.height = height
 		self.description = description
-        
+
 	def publish(self, handler):
 		Serializable.publish(self, handler)
 		self.handler.startElement("image", {})
@@ -192,10 +191,10 @@ class TextInput(Serializable):
 	"""
 	def __init__(self, title, description, name, link):
 		""" Keyword arguments:
-		title -- The label of the submit button in the text input area. 
+		title -- The label of the submit button in the text input area.
 		description -- Explains the text input area.
-		name -- The name of the text object in the text input area. 
-		link -- The URL of the CGI script that processes text input requests. 
+		name -- The name of the text object in the text input area.
+		link -- The URL of the CGI script that processes text input requests.
 		"""
 
 		Serializable.__init__(self)
@@ -359,7 +358,7 @@ class iTunesOwner(Serializable):
 		self.email = email
 
 	def publish(self, handler):
-		Serializable.publish(self, handler)		
+		Serializable.publish(self, handler)
 
 		self.handler.startElement("itunes:owner", {})
 		self._write_element("itunes:name", self.name)
@@ -383,7 +382,7 @@ class iTunesCategory(Serializable):
 		self.subcategory = subcategory
 
 	def publish(self, handler):
-		Serializable.publish(self, handler)	
+		Serializable.publish(self, handler)
 
 		self.handler.startElement("itunes:category", { "text": self.name })
 
@@ -396,7 +395,7 @@ class iTunes(Extension):
 	""" Extension for iTunes metatags.
 	More information at https://www.apple.com/itunes/podcasts/specs.html
 	"""
-	def __init__(self, author = None, block = None, categories = None, image = None, explicit = None, complete = None, owner = None, subtitle = None, 
+	def __init__(self, author = None, block = None, categories = None, image = None, explicit = None, complete = None, owner = None, subtitle = None,
 		summary = None, new_feed_url = None):
 		""" Keyword arguments:
 		author -- The author of the podcast. Visible under podcast title and in iTunes Store Browse.
@@ -514,12 +513,12 @@ class iTunesItem(Serializable):
 
 
 class Item(Host):
-	""" An Item object may represent a "story" - much like a story in a newspaper or magazine; if so its description is a synopsis of the story, and the link points to the full story. 
-	An item may also be complete in itself, if so, the description contains the text, and the link and title may be omitted. All elements of an item are optional, however at least one 
+	""" An Item object may represent a "story" - much like a story in a newspaper or magazine; if so its description is a synopsis of the story, and the link points to the full story.
+	An item may also be complete in itself, if so, the description contains the text, and the link and title may be omitted. All elements of an item are optional, however at least one
 	of title or description must be present.
 	More information at http://cyber.law.harvard.edu/rss/rss.html#hrelementsOfLtitemgt
 	"""
-	def __init__(self, title = None, link = None, description = None, author = None, categories = None, comments = None, enclosure = None, 
+	def __init__(self, title = None, link = None, description = None, author = None, categories = None, comments = None, enclosure = None,
 		guid = None, pubDate = None, source = None, extensions = None):
 		""" Keyword arguments:
 		title -- Optional. The title of the item.
@@ -589,8 +588,8 @@ class Item(Host):
 		self.handler.endElement("item")
 
 class Feed(Host):
-	def __init__(self, title, link, description, language = None, copyright = None, managingEditor = None, webMaster = None, pubDate = None, 
-		lastBuildDate = None, categories = None, generator = None, docs = None, cloud = None, ttl = None, image = None, rating = None, 
+	def __init__(self, title, link, description, language = None, copyright = None, managingEditor = None, webMaster = None, pubDate = None,
+		lastBuildDate = None, categories = None, generator = None, docs = None, cloud = None, ttl = None, image = None, rating = None,
 		textInput = None, skipHours = None, skipDays = None, items = None, extensions = None):
 		""" Keyword arguments:
 		title -- The name of the channel.
@@ -637,7 +636,7 @@ class Feed(Host):
 		self.ttl = ttl
 		self.image = image
 		self.rating = rating
-		self.textInput = textInput 
+		self.textInput = textInput
 		self.skipHours = skipHours
 		self.skipDays = skipDays
 
@@ -658,7 +657,7 @@ class Feed(Host):
 		handler.startElement("rss", self._get_attributes())
 		self.publish(handler)
 		handler.endElement("rss")
-		
+
 		handler.endDocument()
 		return output.getvalue()
 
@@ -699,7 +698,7 @@ class Feed(Host):
 			self.skipHours.publish(self.handler)
 
 		if self.skipDays is not None:
-			self.skipDays.publish(self.handler)	
+			self.skipDays.publish(self.handler)
 
 		for extension in self.extensions:
 			extension.publish(self.handler)
@@ -721,13 +720,13 @@ class Feed(Host):
 		return attributes
 
 class ElementRequiredError(Exception):
-    def __init__(self, element1, element2 = None):
-        self.element1 = element1
-        self.element2 = element2
+	def __init__(self, element1, element2 = None):
+		self.element1 = element1
+		self.element2 = element2
 
-    def __str__(self):
+	def __str__(self):
 		if self.element2 is not None:
-			return 'Either "' + self.element1 + '" or "' + self.element2 + '" must be defined'	
+			return 'Either "' + self.element1 + '" or "' + self.element2 + '" must be defined'
 
 		return '"' + self.element1 + '" must be defined'
 

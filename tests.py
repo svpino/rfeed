@@ -1,7 +1,7 @@
 import unittest
 import locale
+import datetime
 from time import gmtime, strftime
-from datetime import datetime
 from rfeed import *
 
 class BaseTestCase(unittest.TestCase):
@@ -32,7 +32,7 @@ class FeedTestCase(BaseTestCase):
 
 	def test_rss_element(self):
 		rss = Feed('', '', '').rss()
-		self.assertTrue('<rss' in rss)		
+		self.assertTrue('<rss' in rss)
 		self.assertTrue('version="2.0"' in rss)
 		self.assertTrue('</rss>' in rss)
 
@@ -78,7 +78,7 @@ class FeedTestCase(BaseTestCase):
 		self.assertTrue(self._element('docs', 'https://github.com/svpino/rfeed/blob/master/README.md') in Feed('', '', '').rss())
 
 	def test_if_docs_not_specified_use_default_value(self):
-		self.assertTrue('<generator>rfeed v' in Feed('', '', '').rss())		
+		self.assertTrue('<generator>rfeed v' in Feed('', '', '').rss())
 
 	def test_cloud_element(self):
 		rss = Feed('', '', '', cloud = Cloud('1', 2, '3', '4', '5')).rss()
