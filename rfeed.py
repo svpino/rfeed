@@ -5,7 +5,6 @@ _generator = __name__ + " v" + ".".join(map(str, __version__))
 _docs = "https://github.com/svpino/rfeed/blob/master/README.md"
 
 import sys
-import datetime
 from xml.sax import saxutils
 
 if sys.version_info[0] == 3:
