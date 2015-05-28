@@ -4,6 +4,7 @@ __author__ = "Santiago L. Valdarrama - https://blog.svpino.com"
 _generator = __name__ + " v" + ".".join(map(str, __version__))
 _docs = "https://github.com/svpino/rfeed/blob/master/README.md"
 
+import itertools
 import sys
 from xml.sax import saxutils
 
@@ -715,7 +716,7 @@ class Feed(Host):
 			if isinstance(extension, Extension):
 				namespace = extension.get_namespace()
 				if namespace is not None:
-					attributes = dict(attributes.items() + namespace.items())
+					attributes = dict(itertools.chain(attributes.items(), namespace.items()))
 
 		return attributes
 
@@ -729,4 +730,3 @@ class ElementRequiredError(Exception):
 			return 'Either "' + self.element1 + '" or "' + self.element2 + '" must be defined'
 
 		return '"' + self.element1 + '" must be defined'
-
