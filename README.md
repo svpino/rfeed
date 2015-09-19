@@ -41,7 +41,7 @@ item2 = Item(
 
 feed = Feed(
 	title = "Sample RSS Feed",
-	link = "http://www.example.com/rss"
+	link = "http://www.example.com/rss",
 	description = "This is an example of how to use rfeed to generate an RSS 2.0 feed",
 	language = "en-US",
 	lastBuildDate = datetime.datetime.now(),
