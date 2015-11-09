@@ -249,11 +249,12 @@ class ItemTestCase(BaseTestCase):
 		self.assertTrue('description' in str(cm.exception))
 
 	def test_optional_elements(self):
-		self.assertTrue(self._element('title', '123') in Feed('', '', '', items = [Item(title='123')]).rss())
-		self.assertTrue(self._element('link', '123') in Feed('', '', '', items = [Item(title = '', link='123')]).rss())
-		self.assertTrue(self._element('description', '123') in Feed('', '', '', items = [Item(description='123')]).rss())
-		self.assertTrue(self._element('author', '123') in Feed('', '', '', items = [Item(title = '', author='123')]).rss())
-		self.assertTrue(self._element('comments', '123') in Feed('', '', '', items = [Item(title = '', comments='123')]).rss())
+		self.assertTrue(self._element('title', 'My title') in Feed('', '', '', items = [Item(title='My title')]).rss())
+		self.assertTrue(self._element('link', 'http://example.com/') in Feed('', '', '', items = [Item(title = '', link='http://example.com/')]).rss())
+		self.assertTrue(self._element('description', 'My description') in Feed('', '', '', items = [Item(description='My description')]).rss())
+		self.assertTrue(self._element('author', 'email@example.com') in Feed('', '', '', items = [Item(title = '', author='email@example.com')]).rss())
+		self.assertTrue(self._element('dc:creator', 'Sample Example') in Feed('', '', '', items = [Item(title = '', creator='Sample Example')]).rss())
+		self.assertTrue(self._element('comments', 'Sample comment') in Feed('', '', '', items = [Item(title = '', comments='Sample comment')]).rss())
 		self.assertTrue(self._element('pubDate', 'Thu, 13 Nov 2014 08:00:00 GMT') in Feed('', '', '', items = [Item(title = '', pubDate = datetime.datetime(2014, 11, 13, 8, 0, 0))]).rss())
 
 	def test_categories_as_single_category_element(self):
