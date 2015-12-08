@@ -519,13 +519,15 @@ class Item(Host):
 	of title or description must be present.
 	More information at http://cyber.law.harvard.edu/rss/rss.html#hrelementsOfLtitemgt
 	"""
-	def __init__(self, title = None, link = None, description = None, author = None, categories = None, comments = None, enclosure = None,
+	def __init__(self, title = None, link = None, description = None, author = None, 
+	creator = None, categories = None, comments = None, enclosure = None,
 		guid = None, pubDate = None, source = None, extensions = None):
 		""" Keyword arguments:
 		title -- Optional. The title of the item.
 		link  -- Optional. The URL of the item.
 		description -- Optional. The item synopsis.
 		author -- Optional. Email address of the author of the item.
+		creator -- Optional. Identifies the person or entity who wrote an item.
 		categories -- Optional. Includes the item in one or more categories.
 		comments -- Optional. URL of a page for comments relating to the item.
 		enclosure -- Optional. Describes a media object that is attached to the item.
@@ -544,6 +546,7 @@ class Item(Host):
 		self.link = link
 		self.description = description
 		self.author = author
+		self.creator = creator
 		self.comments = comments
 		self.enclosure = enclosure
 		self.guid = guid
@@ -566,6 +569,7 @@ class Item(Host):
 		self._write_element("link", self.link)
 		self._write_element("description", self.description)
 		self._write_element("author", self.author)
+		self._write_element("dc:creator", self.creator)
 		self._write_element("comments", self.comments)
 		self._write_element("pubDate", self._date(self.pubDate))
 
@@ -710,7 +714,7 @@ class Feed(Host):
 		handler.endElement("channel")
 
 	def _get_attributes(self):
-		attributes = {"version": "2.0"}
+		attributes = {"version": "2.0", "xmlns:dc" : "http://purl.org/dc/elements/1.1/"}
 
 		for extension in self.extensions:
 			if isinstance(extension, Extension):
