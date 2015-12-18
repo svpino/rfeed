@@ -183,8 +183,8 @@ print feed.rss()
 
 ## Inspiration
 
-I created my own [blog](https://blog.svpino.com) engine in Python for [Google App Engine](https://cloud.google.com/appengine/), 
-thus I needed a way to generate my RSS feed. Later on, I added a [podcast](https://en3y2.svpino.com) site that also needed an RSS 
+I created my own [blog](https://www.shiftedup.com) engine in Python for [Google App Engine](https://cloud.google.com/appengine/), 
+thus I needed a way to generate my RSS feed. Later on, I added a podcast site that also needed an RSS 
 feed, but this time with [iTunes](https://www.apple.com/itunes/podcasts/specs.html) support.
 
 The only help I could find was the amazing [PyRSS2Gen](http://www.dalkescientific.com/Python/PyRSS2Gen.html) library written by 
