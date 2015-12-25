@@ -120,7 +120,7 @@ feed = Feed(
 	language = "en-US",
 	lastBuildDate = datetime.datetime.now(),
 	items = [item],
-	extension = [Content()])
+	extensions = [Content()])
 
 print feed.rss()	
 ```
@@ -176,7 +176,7 @@ feed = Feed(
 	language = "en-US",
 	lastBuildDate = datetime.datetime.now(),
 	items = [item],
-	extension = [itunes])
+	extensions = [itunes])
 
 print feed.rss()	
 ```
