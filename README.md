@@ -171,14 +171,14 @@ itunes = iTunes(
 
 feed = Feed(
 	title = "Sample Podcast RSS Feed",
-	link = "http://www.example.com/rss"
+	link = "http://www.example.com/rss",
 	description = "An example of how to generate an RSS 2.0 feed",
 	language = "en-US",
 	lastBuildDate = datetime.datetime.now(),
 	items = [item],
 	extensions = [itunes])
 
-print feed.rss()	
+print(feed.rss())	
 ```
 
 ## Inspiration
