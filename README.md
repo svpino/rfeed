@@ -155,10 +155,10 @@ item = Item(
 	title = "Sample article",
 	link = "http://www.example.com/articles/1", 
 	description = "This is the description of the first article",
-    author = "Santiago L. Valdarrama",
-    guid = Guid("http://www.example.com/articles/1"),
+	author = "Santiago L. Valdarrama",
+	guid = Guid("http://www.example.com/articles/1"),
 	pubDate = datetime.datetime(2014, 12, 29, 10, 00),
-	enclosure=Enclosure(url="http://www.example.com/articles/1.mp3", length=0, type=''),
+	enclosure = Enclosure(url="http://www.example.com/articles/1.mp3", length=0, type=''),
 	extensions = [itunes_item])
 
 itunes = iTunes(
