@@ -24,31 +24,30 @@ import datetime
 from rfeed import *
 
 item1 = Item(
-	title = "First article",
-	link = "http://www.example.com/articles/1", 
-	description = "This is the description of the first article",
+    title = "First article",
+    link = "http://www.example.com/articles/1", 
+    description = "This is the description of the first article",
     author = "Santiago L. Valdarrama",
     guid = Guid("http://www.example.com/articles/1"),
-	pubDate = datetime.datetime(2014, 12, 29, 10, 00))
+    pubDate = datetime.datetime(2014, 12, 29, 10, 00))
 
 item2 = Item(
-	title = "Second article",
-	link = "http://www.example.com/articles/2", 
-	description = "This is the description of the second article",
+    title = "Second article",
+    link = "http://www.example.com/articles/2", 
+    description = "This is the description of the second article",
     author = "Santiago L. Valdarrama",
     guid = Guid("http://www.example.com/articles/2"),
-	pubDate = datetime.datetime(2014, 12, 30, 14, 15))
+    pubDate = datetime.datetime(2014, 12, 30, 14, 15))
 
 feed = Feed(
-	title = "Sample RSS Feed",
-	link = "http://www.example.com/rss",
-	description = "This is an example of how to use rfeed to generate an RSS 2.0 feed",
-	language = "en-US",
-	lastBuildDate = datetime.datetime.now(),
-	items = [item1, item2])
+    title = "Sample RSS Feed",
+    link = "http://www.example.com/rss",
+    description = "This is an example of how to use rfeed to generate an RSS 2.0 feed",
+    language = "en-US",
+    lastBuildDate = datetime.datetime.now(),
+    items = [item1, item2])
 
-print feed.rss()	
-
+print(feed.rss())
 ```
 
 It's a very succinct example, but it exposes the following concepts:
@@ -92,37 +91,37 @@ import datetime
 from rfeed import *
 
 class Content(Extension):
-	def get_namespace(self):
-		return {"xmlns:content": "http://purl.org/rss/1.0/modules/content/"}
+    def get_namespace(self):
+        return {"xmlns:content": "http://purl.org/rss/1.0/modules/content/"}
 
 class ContentItem(Serializable):
-	def __init__(self, content):
-		Serializable.__init__(self)
-		self.content = content
+    def __init__(self, content):
+        Serializable.__init__(self)
+        self.content = content
 
-	def publish(self, handler):
-		Serializable.publish(self, handler)
-		self._write_element("content:encoded", self.content)
+    def publish(self, handler):
+        Serializable.publish(self, handler)
+        self._write_element("content:encoded", self.content)
 
 item = Item(
-	title = "Sample article",
-	link = "http://www.example.com/articles/1", 
-	description = "This is the description of the first article",
+    title = "Sample article",
+    link = "http://www.example.com/articles/1", 
+    description = "This is the description of the first article",
     author = "Santiago L. Valdarrama",
     guid = Guid("http://www.example.com/articles/1"),
-	pubDate = datetime.datetime(2014, 12, 29, 10, 00),
-	extensions = [ContentItem('This is the value of the enconded content')])
+    pubDate = datetime.datetime(2014, 12, 29, 10, 00),
+    extensions = [ContentItem('This is the value of the enconded content')])
 
 feed = Feed(
-	title = "Sample RSS Feed",
-	link = "http://www.example.com/rss"
-	description = "This is an example of how to use rfeed to generate an RSS 2.0 feed",
-	language = "en-US",
-	lastBuildDate = datetime.datetime.now(),
-	items = [item],
-	extensions = [Content()])
+    title = "Sample RSS Feed",
+    link = "http://www.example.com/rss",
+    description = "This is an example of how to use rfeed to generate an RSS 2.0 feed",
+    language = "en-US",
+    lastBuildDate = datetime.datetime.now(),
+    items = [item],
+    extensions = [Content()])
 
-print feed.rss()	
+print(feed.rss())
 ```
 * Note that we want to add our `Content` instance to the list of extensions at the feed level. This way we make sure the namespace
 is included in the feed.
@@ -143,7 +142,7 @@ for iTunes support. Here is an example of how to use it:
 import datetime 
 from rfeed import *
 
- itunes_item = iTunesItem(
+itunes_item = iTunesItem(
     author = "Santiago L. Valdarrama",
     image = "http://www.example.com/artwork.jpg",
     duration = "01:11:02",
@@ -152,14 +151,14 @@ from rfeed import *
     summary = "Here is the summary of this specific episode")
 
 item = Item(
-	title = "Sample article",
-	link = "http://www.example.com/articles/1", 
-	description = "This is the description of the first article",
-	author = "Santiago L. Valdarrama",
-	guid = Guid("http://www.example.com/articles/1"),
-	pubDate = datetime.datetime(2014, 12, 29, 10, 00),
-	enclosure = Enclosure(url="http://www.example.com/articles/1.mp3", length=0, type=''),
-	extensions = [itunes_item])
+    title = "Sample article",
+    link = "http://www.example.com/articles/1", 
+    description = "This is the description of the first article",
+    author = "Santiago L. Valdarrama",
+    guid = Guid("http://www.example.com/articles/1"),
+    pubDate = datetime.datetime(2014, 12, 29, 10, 00),
+    enclosure = Enclosure(url="http://www.example.com/articles/1.mp3", length=0, type=''),
+    extensions = [itunes_item])
 
 itunes = iTunes(
     author = "Santiago L. Valdarrama",
@@ -171,15 +170,15 @@ itunes = iTunes(
     owner = iTunesOwner(name = 'Santiago L. Valdarrama', email = 'svpino@gmail.com'))
 
 feed = Feed(
-	title = "Sample Podcast RSS Feed",
-	link = "http://www.example.com/rss",
-	description = "An example of how to generate an RSS 2.0 feed",
-	language = "en-US",
-	lastBuildDate = datetime.datetime.now(),
-	items = [item],
-	extensions = [itunes])
+    title = "Sample Podcast RSS Feed",
+    link = "http://www.example.com/rss",
+    description = "An example of how to generate an RSS 2.0 feed",
+    language = "en-US",
+    lastBuildDate = datetime.datetime.now(),
+    items = [item],
+    extensions = [itunes])
 
-print(feed.rss())	
+print(feed.rss())
 ```
 
 ## Inspiration
@@ -218,4 +217,3 @@ I really appreciate anything you can contribute to the library.
 [MIT Licence](https://github.com/svpino/rfeed/blob/master/LICENSE)
 
 Copyright (c) 2014 Santiago Valdarrama
-
