@@ -422,7 +422,7 @@ class iTunes(Extension):
 		self.subtitle = subtitle
 		self.summary = summary
 		self.new_feed_url = new_feed_url
-		sels.type = type
+		self.type = type
 
 		self.categories = [] if categories is None else categories
 
