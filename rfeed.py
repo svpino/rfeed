@@ -397,7 +397,7 @@ class iTunes(Extension):
 	More information at https://www.apple.com/itunes/podcasts/specs.html
 	"""
 	def __init__(self, author = None, block = None, categories = None, image = None, explicit = None, complete = None, owner = None, subtitle = None,
-		summary = None, new_feed_url = None):
+		summary = None, new_feed_url = None, type=None):
 		""" Keyword arguments:
 		author -- The author of the podcast. Visible under podcast title and in iTunes Store Browse.
 		block -- Whether the podcast should appear in the iTunes Store podcast directory.
@@ -409,6 +409,7 @@ class iTunes(Extension):
 		subtitle -- A few words that represent the description of the podcast.
 		summary -- An extended summary of the podcast.
 		new_feed_url -- When changing the podcast RSS URL, this is the new URL where the podcast is located.
+		type -- The type of podcast.
 		"""
 		Extension.__init__(self)
 
@@ -421,6 +422,7 @@ class iTunes(Extension):
 		self.subtitle = subtitle
 		self.summary = summary
 		self.new_feed_url = new_feed_url
+		sels.type = type
 
 		self.categories = [] if categories is None else categories
 
@@ -456,6 +458,8 @@ class iTunes(Extension):
 		self._write_element("itunes:summary", self.summary)
 		self._write_element("itunes:new-feed-url", self.new_feed_url)
 
+		self._write_element("itunes:type", self.type)
+
 		for category in self.categories:
 			if isinstance(category, basestring):
 				category = iTunesCategory(category)
@@ -465,7 +469,8 @@ class iTunesItem(Serializable):
 	""" Extension for iTunes Item metatags.
 	More information at https://www.apple.com/itunes/podcasts/specs.html
 	"""
-	def __init__(self, author = None, block = None, image = None, duration = None, explicit = None, is_closed_captioned = None, order = None, subtitle = None, summary = None):
+	def __init__(self, author = None, block = None, image = None, duration = None, explicit = None, is_closed_captioned = None, order = None, subtitle = None, summary = None,
+		title=None, episode=None, episodeType=None, season=None):
 		""" Keyword arguments:
 		author -- The author of the episode.
 		block -- Whether the episode should appear in the iTunes Store podcast directory.
@@ -476,6 +481,10 @@ class iTunesItem(Serializable):
 		order -- Used to override the default ordering of episodes in the iTunes Store.
 		subtitle -- A few words that represent the description of the episode.
 		summary -- An extended summary of the episode.
+		title -- An episode title.
+		episode -- An episode number.
+		episodeType -- The episode type.
+		season -- The episode season number.
 		"""
 		Serializable.__init__(self)
 
@@ -488,6 +497,10 @@ class iTunesItem(Serializable):
 		self.order = order
 		self.subtitle = subtitle
 		self.summary = summary
+		self.title = title
+		self.episode = episode
+		self.episodeType = episodeType
+		self.season = season
 
 	def publish(self, handler):
 		Serializable.publish(self, handler)
@@ -512,6 +525,11 @@ class iTunesItem(Serializable):
 		self._write_element("itunes:subtitle", self.subtitle)
 		self._write_element("itunes:summary", self.summary)
 
+		self._write_element("itunes:title", self.title)
+		self._write_element("itunes:episode", self.episode)
+		self._write_element("itunes:episodeType", self.episodeType)
+		self._write_element("itunes:season", self.season)
+
 
 class Item(Host):
 	""" An Item object may represent a "story" - much like a story in a newspaper or magazine; if so its description is a synopsis of the story, and the link points to the full story.
@@ -519,7 +537,7 @@ class Item(Host):
 	of title or description must be present.
 	More information at http://cyber.law.harvard.edu/rss/rss.html#hrelementsOfLtitemgt
 	"""
-	def __init__(self, title = None, link = None, description = None, author = None, 
+	def __init__(self, title = None, link = None, description = None, author = None,
 	creator = None, categories = None, comments = None, enclosure = None,
 		guid = None, pubDate = None, source = None, extensions = None):
 		""" Keyword arguments:
