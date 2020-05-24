@@ -540,7 +540,9 @@ class iTunesItem(Serializable):
 		if self.is_closed_captioned is not None:
 			self._write_element("itunes:is_closed_captioned", "yes" if self.is_closed_captioned is True else "no")
 
-		self._write_element("itunes:order", str(self.order))
+		if self.order is not None:
+			self._write_element("itunes:order", str(self.order))
+
 		self._write_element("itunes:subtitle", self.subtitle)
 		self._write_element("itunes:summary", self.summary)
 
