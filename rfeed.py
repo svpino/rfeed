@@ -693,9 +693,9 @@ class Feed(Host):
 
 		self.items = [] if items is None else items
 
-	def rss(self):
+	def rss(self, short_empty_elements=False):
 		output = StringIO()
-		handler = saxutils.XMLGenerator(output, 'UTF-8')
+		handler = saxutils.XMLGenerator(output, 'UTF-8', short_empty_elements=short_empty_elements)
 		handler.startDocument()
 
 		handler.startElement("rss", self._get_attributes())
