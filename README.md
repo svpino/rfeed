@@ -77,7 +77,7 @@ out the `rfeed.py` source file.)
 
 ## Extending the library
 
-The RSS 2.0 specification is extensible, so it's **rfeed**. Adding extra content to your feed is very simple:
+The RSS 2.0 specification is extensible, and so is **rfeed**. Adding extra content to your feed is very simple:
 
 1. Create a class that extends the `Extension` class. 
 2. Overwite the `Extension.get_namespace` method to return the namespace of your extension (the one will be included in the `<rss/>` element of your feed.) 
