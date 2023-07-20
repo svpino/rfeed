@@ -1,0 +1,25 @@
+[project]
+name = "rfeed"
+version = "1.0.0"
+license = { text = "MIT" }
+authors = [
+  { name = "Santiago L. Valdarrama", email = "svpino@gmail.com" },
+]
+description = "Python RSS 2.0 Generator"
+readme = "README.md"
+requires-python = ">=2.7"
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 2",
+  "Programming Language :: Python :: 3",
+  "Topic :: Internet :: WWW/HTTP",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/svpino/rfeed"
+"Bug Tracker" = "https://github.com/svpino/rfeed/issues"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
