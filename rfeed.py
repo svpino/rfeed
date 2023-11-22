@@ -360,6 +360,63 @@ class Source(Serializable):
 
 		self._write_element("source", self.name, { "url": self.url })
 
+class GeoRss(Extension):
+	"""A GeoRSS object supports the GeoRSS-Simple specification and can contain
+	point, line, polygon, and box geometry types, specified in latitude and longitude.
+	More information at https://docs.ogc.org/cs/17-002r1/17-002r1.html#_GeoRSS_Simple_Serialization
+	"""
+
+	def __init__(self, geomtype: str, geomdata: list, **relationship):
+		"""Keyword arguments
+		geomtype -- type of geometry (point, line, polygon, box)
+		geomdata -- list of coordinates for the geometry type specified
+		relationship -- [optional] additional tags that can be added to the georss namespace
+		"""
+		Extension.__init__(self)
+
+		if geomtype is None or geomtype not in ("point", "line", "polygon", "box"):
+			raise ElementRequiredError("geomtype")
+		if geomdata is None or not isinstance(geomdata, list):
+			raise ElementRequiredError("geomdata")
+
+		self.geomtype = geomtype
+
+		if isinstance(geomdata[0], list):
+			self.geomdata = sum(geomdata, [])
+		else:
+			self.geomdata = geomdata
+		
+		lengeomdata = len(self.geomdata)
+		if lengeomdata % 2:
+			raise GeoRssValidationError("Specified geometry has unpaired coordinate.")
+
+		if geomtype == "point" and lengeomdata != 2:
+			raise GeoRssValidationError("Point types must have 2 coordinates.")
+		elif geomtype == "box" and lengeomdata != 4:
+			raise GeoRssValidationError("Box types must have 4 coordinates.")
+		elif geomtype == "line" and lengeomdata < 4:
+			raise GeoRssValidationError("Line types must have at least 2 coordinate pairs.")
+		elif geomtype == "polygon" and (self.geomdata[0] != self.geomdata[-2] or self.geomdata[1] != self.geomdata[-1]):
+			raise GeoRssValidationError("Polygon coordinates must start and end at same point.")
+		elif geomtype == "polygon" and lengeomdata < 8:
+			raise GeoRssValidationError("Polygon types must have at least 4 coordinate pairs.")
+
+		self.relationship = {}
+		relationship_keys = ("featuretypetag", "relationshiptag", "featurename", "elev", "floor", "radius")
+		for k in relationship_keys:
+			if k in relationship.keys():
+				self.relationship[f"georss:{k}"] = relationship[k]
+
+	def publish(self, handler):
+		Extension.publish(self, handler)
+		self._write_element(f"georss:{self.geomtype}", " ".join(map(lambda x: str(x), self.geomdata)))
+		if self.relationship:
+			for k,v in self.relationship.items():
+				self._write_element(k,v)
+
+	def get_namespace(self):
+			return {"xmlns:georss": "http://www.georss.org/georss"}
+
 class iTunesOwner(Serializable):
 	""" An iTunesOwner object contains contact information for the owner of the podcast intended to be used for administrative communication.
 	More information at https://www.apple.com/itunes/podcasts/specs.html#owner
@@ -761,6 +818,17 @@ class Feed(Host):
 				if namespace is not None:
 					attributes = dict(itertools.chain(attributes.items(), namespace.items()))
 
+		for item in self.items:
+			if isinstance(item, Extension) or hasattr(item, "extensions"):
+				if isinstance(item, Extension):
+					attributes.update(item.get_namespace())
+				if hasattr(item, "extensions"):
+					for ext in item.extensions:
+						if isinstance(ext, Extension):
+							namespace = ext.get_namespace()
+							if namespace:
+								attributes.update(namespace)
+
 		return attributes
 
 class ElementRequiredError(Exception):
@@ -773,3 +841,14 @@ class ElementRequiredError(Exception):
 			return 'Either "' + self.element1 + '" or "' + self.element2 + '" must be defined'
 
 		return '"' + self.element1 + '" must be defined'
+
+class GeoRssValidationError(Exception):
+	def __init__(self, message, **extras):
+		self.message = message
+		self.extras = extras
+	
+	def __str__(self):
+		message = self.message
+		if self.extras:
+			message += str(self.extras)
+		return message

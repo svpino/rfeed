@@ -19,9 +19,9 @@ class HostTestCase(BaseTestCase):
 
 	def test_add_extension(self):
 		host = Host()
-		self.assertEquals(0, len(host.extensions))
+		self.assertEqual(0, len(host.extensions))
 		host.add_extension(MockExtension1())
-		self.assertEquals(1, len(host.extensions))
+		self.assertEqual(1, len(host.extensions))
 
 	def test_add_extension_raises_error_if_extension_is_not_serializable(self):
 		host = Host()
@@ -474,6 +474,45 @@ class iTunesItemTestCase(BaseTestCase):
 	def test_is_closed_captioned_should_not_be_included_if_not_specified(self):
 		self.assertFalse(self._element('itunes:is_closed_captioned', 'yes') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem()])]).rss())
 		self.assertFalse(self._element('itunes:is_closed_captioned', 'no') in Feed('', '', '', items = [Item(title = '', extensions = [iTunesItem()])]).rss())
+
+
+class GeoRssTestCase(BaseTestCase):
+	
+	def test_namespace_is_added_to_the_feed(self):
+		self.assertTrue('xmlns:georss="http://www.georss.org/georss"' in Feed('', '', '', items = [Item(title = '', extensions=[GeoRss('point', [0,90])])]).rss())
+
+	def test_coordinate_pair_count(self):
+		with self.assertRaises(GeoRssValidationError) as cm:
+			Feed('', '', '', items = [Item(title = '', extensions=[GeoRss('point', [0,90,1])])]).rss()
+		self.assertTrue('unpaired' in str(cm.exception))
+
+		with self.assertRaises(GeoRssValidationError) as cm:
+			Feed('', '', '', items = [Item(title = '', extensions=[GeoRss('line', [0,90])])]).rss()
+		self.assertTrue('2 coordinate' in str(cm.exception))
+
+		with self.assertRaises(GeoRssValidationError) as cm:
+			Feed('', '', '', items = [Item(title = '', extensions=[GeoRss('box', [0,90,1,10,3,10])])]).rss()
+		self.assertTrue('4 coordinates' in str(cm.exception))
+
+		with self.assertRaises(GeoRssValidationError) as cm:
+			Feed('', '', '', items = [Item(title = '', extensions=[GeoRss('polygon', [0,90,1,10,0,90])])]).rss()
+		self.assertTrue('4 coordinate pairs' in str(cm.exception))
+
+	def test_polygon_is_closed(self):
+		with self.assertRaises(GeoRssValidationError) as cm:
+			Feed('', '', '', items = [Item(title = '', extensions=[GeoRss('polygon', [0,90,1,10,3,4,0,91])])]).rss()
+		self.assertTrue('start and end' in str(cm.exception))
+
+	def test_coordinate_pair_count_flatten(self):
+		with self.assertRaises(GeoRssValidationError) as cm:
+			Feed('', '', '', items = [Item(title = '', extensions=[GeoRss('point', [[0,90],[1,89],[2,88],[3,4,5]] )])]).rss()
+		self.assertTrue('unpaired' in str(cm.exception))
+	
+	def test_remove_nonconforming_relationships(self):
+		rss_data = Feed('', '', '', items = [Item(title = '', extensions=[GeoRss('point', [0,90], elev=42, floor=13, pink=33)])]).rss()
+		self.assertTrue(self._element("georss:elev", "42") in rss_data)
+		self.assertTrue(self._element("georss:floor", "13") in rss_data)
+		self.assertFalse(self._element("georss:pink", "33") in rss_data)
 
 class MockExtension1(Extension):
 	def __init__(self):
